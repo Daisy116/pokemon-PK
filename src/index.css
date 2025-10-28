@@ -17,7 +17,14 @@ body { @apply text-zinc-900 bg-white; }
 .tabs-trigger[data-state="active"] { @apply bg-zinc-900 text-white shadow font-medium; }
 
 /* 基本元件（若你的 shadcn/button.tsx 尚未接好變體，可先用這些） */
-.btn { @apply px-3 py-2 rounded-xl shadow border bg-white active:scale-[.98] transition; }
+/* 建議把自訂元件類別放在 components layer */
+@layer components {
+  /* 不預設背景色，避免覆蓋按鈕上的 bg-* */
+  .btn { @apply px-3 py-2 rounded-xl shadow border active:scale-[.98] transition; }
+
+  /* 需要白底的地方才另外加這個 class */
+  .btn-white { @apply bg-white; }
+}
 .btn-secondary { @apply bg-zinc-100 hover:bg-zinc-200; }
 .btn:disabled { @apply opacity-50 pointer-events-none; }
 

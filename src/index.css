@@ -2,6 +2,7 @@
 @tailwind components;
 @tailwind utilities;
 
+/* optional: 全域小設定 */
 :root {
   color-scheme: light;
   -webkit-tap-highlight-color: transparent;
@@ -9,11 +10,18 @@
 
 html, body, #root { height: 100%; }
 body { @apply text-zinc-900 bg-white; }
-.btn { @apply px-3 py-2 rounded-xl shadow border bg-zinc-100 active:scale-[.98] transition; }
+
+/* shadcn 風格：用 Radix 的 data-state */
+.tabs-list { @apply grid grid-cols-2 w-full bg-zinc-100 rounded-xl p-1; }
+.tabs-trigger { @apply py-2 rounded-lg text-sm text-center text-zinc-700; }
+.tabs-trigger[data-state="active"] { @apply bg-zinc-900 text-white shadow font-medium; }
+
+/* 基本元件（若你的 shadcn/button.tsx 尚未接好變體，可先用這些） */
+.btn { @apply px-3 py-2 rounded-xl shadow border bg-white active:scale-[.98] transition; }
+.btn-secondary { @apply bg-zinc-100 hover:bg-zinc-200; }
+.btn:disabled { @apply opacity-50 pointer-events-none; }
+
 .input { @apply px-3 py-2 rounded-xl border shadow w-full; }
-.card { @apply rounded-2xl border bg-white shadow-sm; }
+.card  { @apply rounded-2xl border bg-white shadow-sm; }
 .card-title { @apply text-base font-semibold; }
 .badge { @apply inline-flex items-center gap-1 text-xs px-2 py-1 rounded-xl; }
-.tabs-list { @apply grid grid-cols-2 w-full bg-zinc-100 rounded-xl p-1; }
-.tabs-trigger { @apply py-2 rounded-lg text-center; }
-.tabs-trigger[data-active="true"] { @apply bg-white shadow font-medium; }

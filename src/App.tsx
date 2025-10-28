@@ -313,7 +313,7 @@ export default function App(){
             <CardContent>
               <div className="flex gap-2 mb-2">
                 <Input className="h-8 text-base" placeholder="e.g. pikachu, charizard, meowscarada" value={enemyName} onChange={e=>setEnemyName(e.target.value)} />
-                <p className="h-8 px-4 text-sm rounded-full bg-zinc-800 text-white  min-w-[80px]" onClick={handleLookup} disabled={loading || !enemyName.trim()}>{loading? "查詢中…":"查屬性"}</p>
+                <p className="h-8 px-4 text-sm rounded-full bg-zinc-800 text-white leading-6  min-w-[76px]" onClick={handleLookup} disabled={loading || !enemyName.trim()}>{loading? "查詢中…":"查屬性"}</p>
               </div>
             </CardContent>
           </Card>

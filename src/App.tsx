@@ -297,7 +297,7 @@ export default function App(){
   return (
     <div className="min-h-screen bg-white text-zinc-900 p-4 max-w-md mx-auto">
       <h1 className="text-xl font-bold">寶可夢屬性相剋查詢器</h1>
-      <p className="text-sm text-zinc-600 mb-3">輸入對手名稱（英文）或手動選屬性，立即看弱點；維護你的隊伍招式屬性，幫你推薦上場人選。</p>
+      <p className="text-sm text-zinc-600 mb-3">【對手查詢】：輸入對手名稱或手動選屬性，立即看弱點。 <br/>【我的隊伍】：維護你的隊伍招式屬性，幫你推薦上場人選。</p>
 
       {/* 頁首分頁：對手查詢 / 我的隊伍 */}
       <Tabs defaultValue="enemy" className="w-full">
@@ -311,9 +311,20 @@ export default function App(){
           <Card className="mb-4 rounded-2xl">
             <CardHeader className="pb-2"><CardTitle className="text-base">1) 以名稱查屬性</CardTitle></CardHeader>
             <CardContent>
-              <div className="flex gap-2 mb-2">
-                <Input className="h-8 text-base" placeholder="e.g. pikachu, charizard, meowscarada" value={enemyName} onChange={e=>setEnemyName(e.target.value)} />
-                <p className="h-8 px-4 text-sm rounded-full bg-zinc-800 text-white leading-6  min-w-[76px]" onClick={handleLookup} disabled={loading || !enemyName.trim()}>{loading? "查詢中…":"查屬性"}</p>
+              <div className="flex gap-2 items-center mb-2">
+                <Input
+                  className="h-9 text-sm"
+                  placeholder="e.g. pikachu, charizard, meowscarada"
+                  value={enemyName}
+                  onChange={(e)=>setEnemyName(e.target.value)}
+                />
+                <Button
+                  className="rounded-full min-w-[80px] bg-zinc-900 text-white border border-zinc-900 h-9 px-4 text-sm font-medium hover:bg-zinc-800 active:scale-[.98] transition disabled:opacity-50 disabled:pointer-events-none"
+                  onClick={handleLookup}
+                  disabled={loading || !enemyName.trim()}
+                >
+                  {loading ? "查詢中…" : "查屬性"}
+                </Button>
               </div>
             </CardContent>
           </Card>

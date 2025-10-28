@@ -301,9 +301,9 @@ export default function App(){
 
       {/* 頁首分頁：對手查詢 / 我的隊伍 */}
       <Tabs defaultValue="enemy" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 mb-3">
-          <TabsTrigger value="enemy">對手查詢</TabsTrigger>
-          <TabsTrigger value="team">我的隊伍</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-2 mb-3 rounded-xl bg-zinc-100 p-1">
+          <TabsTrigger value="enemy" className="text-sm data-[state=active]:bg-zinc-900 data-[state=active]:text-white rounded-lg">對手查詢</TabsTrigger>
+          <TabsTrigger value="team" className="text-sm data-[state=active]:bg-zinc-900 data-[state=active]:text-white rounded-lg">我的隊伍</TabsTrigger>
         </TabsList>
 
         {/* 對手查詢分頁 */}
@@ -312,8 +312,8 @@ export default function App(){
             <CardHeader className="pb-2"><CardTitle className="text-base">1) 以名稱查屬性</CardTitle></CardHeader>
             <CardContent>
               <div className="flex gap-2 mb-2">
-                <Input placeholder="e.g. pikachu, charizard, meowscarada" value={enemyName} onChange={e=>setEnemyName(e.target.value)} />
-                <Button onClick={handleLookup} disabled={loading || !enemyName.trim()}>{loading? "查詢中…":"查屬性"}</Button>
+                <Input className="h-8 text-base" placeholder="e.g. pikachu, charizard, meowscarada" value={enemyName} onChange={e=>setEnemyName(e.target.value)} />
+                <Button className="h-8 px-4 text-sm" onClick={handleLookup} disabled={loading || !enemyName.trim()}>{loading? "查詢中…":"查屬性"}</Button>
               </div>
             </CardContent>
           </Card>
@@ -375,12 +375,12 @@ export default function App(){
         {/* 我的隊伍分頁 */}
         <TabsContent value="team">
           <Card className="mb-4 rounded-2xl">
-            <CardHeader className="pb-2"><CardTitle className="text-base">新增隊員（以招式屬性為主）</CardTitle></CardHeader>
+            <CardHeader className="pb-2"><CardTitle className="text-base">新增我的寶可夢隊員</CardTitle></CardHeader>
             <CardContent>
               <div className="text-xs text-zinc-500 mb-2">提示：可先填常用主力招式的屬性；或按「從名稱帶入」自動抓取寶可夢自身屬性作為起點。</div>
               <div className="flex gap-2 mb-2">
-                <Input placeholder="寶可夢名稱（自訂顯示用）" value={draftName} onChange={e=>setDraftName(e.target.value)} />
-                <Button variant="secondary" onClick={bringTypesFromName}>從名稱帶入</Button>
+                <Input className="h-8 text-sm" placeholder="寶可夢名稱" value={draftName} onChange={e=>setDraftName(e.target.value)} />
+                <Button className="h-8 px-4 text-sm" variant="secondary" onClick={bringTypesFromName}>從名稱帶入</Button>
               </div>
               <div className="flex flex-wrap gap-2 mb-3">
                 {TYPES.map(t=> (
@@ -390,7 +390,7 @@ export default function App(){
                   >{TYPE_ZH[t]}</button>
                 ))}
               </div>
-              <Button onClick={addMate} disabled={!draftName.trim() || draftMoves.length===0}>+ 加入隊伍</Button>
+              <Button className="h-9 px-4 text-base" onClick={addMate} disabled={!draftName.trim() || draftMoves.length===0}>+ 加入隊伍</Button>
             </CardContent>
           </Card>
 
@@ -407,7 +407,7 @@ export default function App(){
                           {m.moves.map(t=> <TypeBadge key={m.id+':'+t} t={t} />)}
                         </div>
                       </div>
-                      <Button variant="destructive" onClick={()=>removeMate(m.id)}>刪除</Button>
+                      <Button className="h-9 px-3" variant="destructive" onClick={()=>removeMate(m.id)}>刪除</Button>
                     </li>
                   ))}
                 </ul>

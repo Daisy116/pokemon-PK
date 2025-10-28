@@ -386,24 +386,64 @@ export default function App(){
         {/* 我的隊伍分頁 */}
         <TabsContent value="team">
           <Card className="mb-4 rounded-2xl">
-            <CardHeader className="pb-2"><CardTitle className="text-base">新增我的寶可夢隊員</CardTitle></CardHeader>
-            <CardContent>
-              <div className="text-xs text-zinc-500 mb-2">提示：可先填常用主力招式的屬性；或按「從名稱帶入」自動抓取寶可夢自身屬性作為起點。</div>
-              <div className="flex gap-2 mb-2">
-                <Input className="h-8 text-sm" placeholder="寶可夢名稱" value={draftName} onChange={e=>setDraftName(e.target.value)} />
-                <Button className="h-8 px-4 text-sm" variant="secondary" onClick={bringTypesFromName}>從名稱帶入</Button>
-              </div>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {TYPES.map(t=> (
-                  <button key={t}
-                    onClick={()=>toggleDraftType(t)}
-                    className={`px-3 py-1 rounded-full text-sm shadow border ${draftMoves.includes(t)? 'ring-2 ring-black':''} ${TYPE_COLORS[t]||'bg-gray-200 text-black'}`}
-                  >{TYPE_ZH[t]}</button>
-                ))}
-              </div>
-              <Button className="h-9 px-4 text-base" onClick={addMate} disabled={!draftName.trim() || draftMoves.length===0}>+ 加入隊伍</Button>
-            </CardContent>
-          </Card>
+  <CardHeader className="pb-2">
+    <CardTitle className="text-base">新增我的寶可夢隊員</CardTitle>
+  </CardHeader>
+  <CardContent>
+    <div className="text-xs text-zinc-500 mb-2">
+      提示：輸入寶可夢名稱後點右側按鈕，系統會自動抓取屬性並加入隊伍。
+    </div>
+
+    {/* 名稱輸入 + 右側合併按鈕 */}
+    <div className="flex gap-2 items-center mb-2">
+      <Input
+        className="h-9 text-sm"
+        placeholder="寶可夢名稱"
+        value={draftName}
+        onChange={(e) => setDraftName(e.target.value)}
+      />
+      <Button
+        className="rounded-full min-w-[70px] bg-zinc-900 text-white border border-zinc-900 h-9 px-3 text-sm font-medium hover:bg-zinc-800 active:scale-[.98] transition disabled:opacity-50 disabled:pointer-events-none"
+        onClick={async () => {
+          if (!draftName.trim()) return;
+          const types = await fetchTypesByName(draftName.trim());
+          if (types) {
+            const newMate = {
+              id: `${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+              name: draftName.trim(),
+              moves: types,
+            };
+            setTeam((prev) => [...prev, newMate]);
+            setDraftName("");
+          }
+        }}
+        disabled={loading || !draftName.trim()}
+      >
+        加入
+      </Button>
+    </div>
+
+    {/* （保留）型色按鈕區：你若仍想手動挑戰術屬性可以留著；不需要也可刪整段 */}
+    <div className="flex flex-wrap gap-2 mb-3">
+      {TYPES.map((t) => (
+        <button
+          key={t}
+          onClick={() =>
+            setDraftMoves((prev) =>
+              prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+            )
+          }
+          className={`px-3 py-1 rounded-full text-sm shadow border ${
+            draftMoves.includes(t) ? "ring-2 ring-black" : ""
+          } ${TYPE_COLORS[t] || "bg-gray-200 text-black"}`}
+        >
+          {TYPE_ZH[t]}
+        </button>
+      ))}
+    </div>
+  </CardContent>
+</Card>
+
 
           <Card className="rounded-2xl">
             <CardHeader className="pb-2"><CardTitle className="text-base">我的隊伍</CardTitle></CardHeader>

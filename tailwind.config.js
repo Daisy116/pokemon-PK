@@ -6,5 +6,5 @@ export default {
     './components/**/*.{ts,tsx,js,jsx}',
   ],
   theme: { extend: {} },
-  plugins: [require('tailwindcss-animate')],
+  plugins: [],
 }

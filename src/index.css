@@ -2,41 +2,70 @@
 @tailwind components;
 @tailwind utilities;
 
-/* optional: 全域小設定 */
 :root {
   color-scheme: light;
   -webkit-tap-highlight-color: transparent;
 }
 
+/* =========================
+   全域基底
+   ========================= */
 html, body, #root { height: 100%; }
 body { @apply text-zinc-900 bg-white; }
 
-/* shadcn 風格：用 Radix 的 data-state */
-.tabs-list { @apply grid grid-cols-2 w-full bg-zinc-100 rounded-xl p-1; }
-.tabs-trigger { @apply py-2 rounded-lg text-sm text-center text-zinc-700; }
-.tabs-trigger[data-state="active"] { @apply bg-zinc-900 text-white shadow font-medium; }
-
-/* 基本元件（若你的 shadcn/button.tsx 尚未接好變體，可先用這些） */
-/* 建議把自訂元件類別放在 components layer */
+/* =========================
+   shadcn Tabs 樣式
+   ========================= */
 @layer components {
-  /* 不預設背景色，避免覆蓋按鈕上的 bg-* */
-  .btn { @apply px-3 py-2 rounded-xl shadow border active:scale-[.98] transition; }
+  /* tabs 清單容器 */
+  .tabs-list {
+    @apply w-full grid grid-cols-2 mb-3 rounded-xl bg-zinc-100 p-1;
+  }
 
-  /* 需要白底的地方才另外加這個 class */
-  .btn-white { @apply bg-white; }
+  /* 頁籤按鈕 */
+  .tabs-trigger {
+    @apply text-sm rounded-lg text-zinc-700 py-2 transition font-medium;
+  }
 
-  .tabs-trigger { @apply text-sm rounded-lg text-zinc-700; }
+  /* 這裡改用 data-active 取代 data-state，確保吃到樣式 */
   .tabs-trigger[data-active="true"] {
-    background-color: rgb(24 24 27); /* zinc-900 */
-    color: white;
-    font-weight: 500;
-    box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+    @apply bg-zinc-900 text-white shadow;
+  }
+
+  /* 按鈕通用樣式 */
+  .btn {
+    @apply px-3 py-2 rounded-xl shadow border active:scale-[.98] transition;
+  }
+
+  .btn-white {
+    @apply bg-white;
+  }
+
+  .btn-secondary {
+    @apply bg-zinc-100 hover:bg-zinc-200;
+  }
+
+  .btn:disabled {
+    @apply opacity-50 pointer-events-none;
+  }
+
+  /* input */
+  .input {
+    @apply px-3 py-2 rounded-xl border shadow w-full;
+  }
+
+  /* 卡片 */
+  .card {
+    @apply rounded-2xl border bg-white shadow-sm;
+  }
+
+  /* 卡片標題 */
+  .card-title {
+    @apply text-base font-semibold;
+  }
+
+  /* badge */
+  .badge {
+    @apply inline-flex items-center gap-1 text-xs px-2 py-1 rounded-xl;
   }
 }
-.btn-secondary { @apply bg-zinc-100 hover:bg-zinc-200; }
-.btn:disabled { @apply opacity-50 pointer-events-none; }
-
-.input { @apply px-3 py-2 rounded-xl border shadow w-full; }
-.card  { @apply rounded-2xl border bg-white shadow-sm; }
-.card-title { @apply text-base font-semibold; }
-.badge { @apply inline-flex items-center gap-1 text-xs px-2 py-1 rounded-xl; }

@@ -26,7 +26,7 @@ body { @apply text-zinc-900 bg-white; }
   .btn-white { @apply bg-white; }
 
   .tabs-trigger { @apply text-sm rounded-lg text-zinc-700; }
-  .tabs-trigger[data-state="active"] {
+  .tabs-trigger[data-active="true"] {
     background-color: rgb(24 24 27); /* zinc-900 */
     color: white;
     font-weight: 500;

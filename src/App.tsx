@@ -464,18 +464,32 @@ export default function App(){
           </Card>
 
           <Card className="rounded-2xl">
-            <CardHeader className="pb-2"><CardTitle className="text-base">依我的隊伍推薦上場</CardTitle></CardHeader>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">依我的隊伍推薦上場</CardTitle>
+            </CardHeader>
             <CardContent>
-              {teamSuggest.length? (
-                <ul className="list-disc pl-5 space-y-1">
-                  {teamSuggest.map(m=> (
-                    <li key={m.id} className="text-sm">
-                      <span className="font-medium mr-2">{m.name}</span>
-                      {m.moves.map(t=> <TypeBadge key={m.id+t} t={t} />)}
-                    </li>
-                  ))}
-                </ul>
-              ): <div className="text-sm text-zinc-500">尚未新增隊伍。請至「我的隊伍」分頁新增。</div>}
+              {!mult ? (
+                <div className="text-sm text-zinc-500">請先在上方輸入對手或選擇屬性，才能推薦上場。</div>
+              ) : teamSuggest.length ? (
+                <>
+                  <div className="text-xs text-zinc-500 mb-2">敵方弱點：{weakList.map(w=> <TypeBadge key={w.type} t={w.type} extra={`×${w.val}`} />)}</div>
+                  <ul className="space-y-2">
+                    {teamSuggest.map(m=> (
+                      <li key={m.id} className="flex items-center justify-between bg-white border rounded-xl p-2 shadow-sm">
+                        <div className="flex items-center gap-3">
+                          <TeamAvatar name={m.name} dex={m.dex} size={64} />
+                          <div>
+                            <div className="text-sm font-medium">{m.name}</div>
+                            <div className="mt-0.5">{m.moves.map(t=> <TypeBadge key={m.id+':'+t} t={t} />)}</div>
+                          </div>
+                        </div>
+                      </li>
+                    ))}
+                  </ul>
+                </>
+              ) : (
+                <div className="text-sm text-zinc-500">你的隊伍中暫無對應敵方弱點的成員。</div>
+              )}
             </CardContent>
           </Card>
         </TabsContent>

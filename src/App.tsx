@@ -6,6 +6,83 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 /* =========================
+   圖片來源優先順序（支援你放在 public/pokemon 的圖庫）
+   1) 本機：/pokemon/XXX.png（優先嘗試 3 位數補零，例如 006.png，其次 6.png）
+   2) PokeAPI 官方原畫
+   ========================= */
+function pad3(n:number){ return String(n).padStart(3, "0"); }
+function remoteArtUrl(id: number){
+  return `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${id}.png`;
+}
+/**
+ * 會依序嘗試：/pokemon/006.png → /pokemon/6.png → PokeAPI
+ * 並預先檢查可否載入，避免 onError 連環觸發造成首次打不開。
+ */
+function PokemonArt({ id, size = 120, className = "" }: { id: number; size?: number; className?: string }){
+  const [src, setSrc] = React.useState<string | null>(null);
+  React.useEffect(() => {
+    let alive = true;
+    const u1 = `/pokemon/${pad3(id)}.png`;
+    const u2 = `/pokemon/${id}.png`;
+    const u3 = remoteArtUrl(id);
+
+    const load = (url: string) => new Promise<boolean>((resolve) => {
+      const img = new Image();
+      img.onload = () => resolve(true);
+      img.onerror = () => resolve(false);
+      img.src = url;
+    });
+
+    (async () => {
+      setSrc(null); // reset while 嘗試
+      if (await load(u1)) { if (alive) setSrc(u1); return; }
+      if (await load(u2)) { if (alive) setSrc(u2); return; }
+      if (alive) setSrc(u3);
+    })();
+    return () => { alive = false; };
+  }, [id]);
+
+  return (
+    <div className={`grid place-items-center ${className}`} style={{ width: size, height: size }}>
+      {src ? (
+        <img
+          src={src}
+          alt={`#${id}`}
+          width={size}
+          height={size}
+          style={{ width: size, height: size, objectFit: "contain" }}
+          loading="lazy"
+        />
+      ) : (
+        <span className="text-xs text-zinc-400">#{id}</span>
+      )}
+    </div>
+  );
+}
+
+/* =========================
+   以名稱補圖：隊伍列表 fallback 用
+   ========================= */
+function TeamAvatar({ name, dex, size = 64 }: { name: string; dex?: number; size?: number }){
+  const [id, setId] = React.useState<number | null>(dex ?? null);
+  React.useEffect(() => {
+    let alive = true;
+    if (dex) { setId(dex); return; }
+    (async () => {
+      const info = await fetchInfoByName(name);
+      if (alive) setId(info?.id ?? null);
+    })();
+    return () => { alive = false; };
+  }, [name, dex]);
+
+  return id ? (
+    <div className="rounded-lg border p-1 bg-white"><PokemonArt id={id} size={size} /></div>
+  ) : (
+    <div className="w-16 h-16 rounded-lg bg-zinc-200 grid place-items-center text-xs text-zinc-500">無圖</div>
+  );
+}
+
+/* =========================
    顏色：按鈕/徽章對應的型色
    ========================= */
 const TYPE_COLORS: Record<string,string> = {
@@ -199,6 +276,27 @@ function multiplyAgainst(defTypes: string[]): Record<string, number> {
 }
 
 /* =========================
+   用名稱拿「屬性 + 圖鑑編號」
+   ========================= */
+async function fetchInfoByName(name: string): Promise<{ id: number; types: string[] } | null> {
+  const maybeEn = await translateNameToEnglish(name);
+  const en = maybeEn ?? name.trim().toLowerCase();
+  const key = `poke_info_${en}`;
+  const cached = localStorage.getItem(key);
+  if (cached) return JSON.parse(cached);
+  try {
+    const resp = await fetch(`https://pokeapi.co/api/v2/pokemon/${encodeURIComponent(en)}`);
+    if (!resp.ok) throw new Error("not ok");
+    const data = await resp.json();
+    const out = { id: data.id as number, types: (data.types as any[]).map((t:any)=> t.type.name) as string[] };
+    localStorage.setItem(key, JSON.stringify(out));
+    return out;
+  } catch {
+    return null;
+  }
+}
+
+/* =========================
    取得對手屬性（支援中文）
    ========================= */
 async function fetchTypesByName(name: string): Promise<string[] | null> {
@@ -226,11 +324,12 @@ export default function App(){
   // --- 對手查詢 ---
   const [enemyName, setEnemyName] = useState("");
   const [enemyTypes, setEnemyTypes] = useState<string[]|null>(null);
+  const [enemyId, setEnemyId] = useState<number|null>(null);
   const [loading, setLoading] = useState(false);
   const [manual, setManual] = useState<string[]>([]); // 手動指定對手屬性（最多 2）
 
   // --- 我的隊伍（以招式屬性為主） ---
-  type TeamMate = { id: string; name: string; moves: string[] };
+  type TeamMate = { id: string; name: string; moves: string[]; dex?: number };
   const [team, setTeam] = useState<TeamMate[]>(()=>loadJSON("my_team", []));
   useEffect(()=>saveJSON("my_team", team), [team]);
 
@@ -271,9 +370,9 @@ export default function App(){
   async function handleLookup(){
     if (!enemyName.trim()) return;
     setLoading(true);
-    const t = await fetchTypesByName(enemyName.trim());
-    setEnemyTypes(t);
-    setManual([]);
+    const info = await fetchInfoByName(enemyName.trim());
+    if (info){ setEnemyTypes(info.types); setEnemyId(info.id); setManual([]); }
+    else { setEnemyTypes(null); setEnemyId(null); }
     setLoading(false);
   }
 
@@ -288,9 +387,18 @@ export default function App(){
   }
   function addMate(){
     if (!draftName.trim() || draftMoves.length===0) return;
-    const id = `${Date.now()}_${Math.random().toString(36).slice(2,6)}`;
-    setTeam([...team, { id, name: draftName.trim(), moves: draftMoves }]);
+    const newMate = { id: `${Date.now()}_${Math.random().toString(36).slice(2,6)}`, name: draftName.trim(), moves: draftMoves } as TeamMate;
+    setTeam(prev=>[...prev, newMate]);
     setDraftName(""); setDraftMoves([]);
+  }
+  async function addMateAutoFromName(){
+    if (!draftName.trim()) return;
+    const info = await fetchInfoByName(draftName.trim());
+    if (info){
+      const newMate: TeamMate = { id: `${Date.now()}_${Math.random().toString(36).slice(2,6)}`, name: draftName.trim(), moves: info.types, dex: info.id };
+      setTeam(prev=>[...prev, newMate]);
+      setDraftName(""); setDraftMoves([]);
+    }
   }
   function removeMate(id:string){ setTeam(team.filter(x=>x.id!==id)); }
 
@@ -314,7 +422,7 @@ export default function App(){
               <div className="flex gap-2 items-center mb-2">
                 <Input
                   className="h-9 text-sm"
-                  placeholder="e.g. pikachu, charizard, meowscarada"
+                  placeholder="輸入中文或英文名稱（例：皮卡丘 / pikachu）"
                   value={enemyName}
                   onChange={(e)=>setEnemyName(e.target.value)}
                 />
@@ -326,25 +434,14 @@ export default function App(){
                   {loading ? "查詢中…" : "查屬性"}
                 </Button>
               </div>
-            </CardContent>
-          </Card>
-
-          <Card className="mb-4 rounded-2xl">
-            <CardHeader className="pb-2"><CardTitle className="text-base">2) 或手動選屬性 <span className="text-xs text-zinc-500 align-middle">（可複選最多 2 種防禦屬性）</span></CardTitle></CardHeader>
-            <CardContent>
-              <div className="flex flex-wrap gap-2 mb-2">
-                {TYPES.map(t=> (
-                  <button key={t}
-                    onClick={()=>{
-                      const next = manual.includes(t)? manual.filter(x=>x!==t): [...manual, t].slice(0,2);
-                      setManual(next); setEnemyTypes(null);
-                    }}
-                    className={`px-3 py-1 rounded-full text-sm shadow border ${manual.includes(t)? 'ring-2 ring-black':''} ${TYPE_COLORS[t]||'bg-gray-200 text-black'}`}
-                    title={TYPE_ZH[t]}
-                  >{TYPE_ZH[t]}</button>
-                ))}
-              </div>
-              <div className="text-sm text-zinc-600">目前：{(enemyTypes??manual).length? (enemyTypes??manual).map(t=> <TypeBadge key={t} t={t} />): '未選擇'}</div>
+<div className="text-sm text-zinc-600">目前：{(enemyTypes??manual).length? (enemyTypes??manual).map(t=> <TypeBadge key={t} t={t} />): '未選擇'}</div>
+              {enemyId ? (
+                <div className="mt-3 w-full flex justify-center">
+                  <div className="rounded-xl border p-2 bg-zinc-50">
+                    <PokemonArt id={enemyId} size={160} />
+                  </div>
+                </div>
+              ) : null}
             </CardContent>
           </Card>
 
@@ -387,62 +484,50 @@ export default function App(){
         <TabsContent value="team">
           <Card className="mb-4 rounded-2xl">
               <CardHeader className="pb-2">
-    <CardTitle className="text-base">新增我的寶可夢隊員</CardTitle>
-  </CardHeader>
-  <CardContent>
-    <div className="text-xs text-zinc-500 mb-2">
-      提示：輸入寶可夢名稱後點右側按鈕，系統會自動抓取屬性並加入隊伍。
-    </div>
+                <CardTitle className="text-base">新增我的寶可夢隊員</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-xs text-zinc-500 mb-2">
+                  提示：輸入寶可夢名稱後點右側按鈕，系統會自動抓取屬性並加入隊伍。
+                </div>
 
-    {/* 名稱輸入 + 右側合併按鈕 */}
-    <div className="flex gap-2 items-center mb-2">
-      <Input
-        className="h-9 text-sm"
-        placeholder="寶可夢名稱"
-        value={draftName}
-        onChange={(e) => setDraftName(e.target.value)}
-      />
-      <Button
-        className="rounded-full min-w-[70px] bg-zinc-900 text-white border border-zinc-900 h-9 px-3 text-sm font-medium hover:bg-zinc-800 active:scale-[.98] transition disabled:opacity-50 disabled:pointer-events-none"
-        onClick={async () => {
-          if (!draftName.trim()) return;
-          const types = await fetchTypesByName(draftName.trim());
-          if (types) {
-            const newMate = {
-              id: `${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
-              name: draftName.trim(),
-              moves: types,
-            };
-            setTeam((prev) => [...prev, newMate]);
-            setDraftName("");
-          }
-        }}
-        disabled={loading || !draftName.trim()}
-      >
-        加入
-      </Button>
-    </div>
+                {/* 名稱輸入 + 右側合併按鈕 */}
+                <div className="flex gap-2 items-center mb-2">
+                  <Input
+                    className="h-9 text-sm"
+                    placeholder="寶可夢名稱"
+                    value={draftName}
+                    onChange={(e) => setDraftName(e.target.value)}
+                  />
+                  <Button
+                    className="rounded-full min-w-[70px] bg-zinc-900 text-white border border-zinc-900 h-9 px-3 text-sm font-medium hover:bg-zinc-800 active:scale-[.98] transition disabled:opacity-50 disabled:pointer-events-none"
+                    onClick={addMateAutoFromName}
+                    disabled={loading || !draftName.trim()}
+                  >
+                    加入
+                  </Button>
+                </div>
 
-    {/* （保留）型色按鈕區：你若仍想手動挑戰術屬性可以留著；不需要也可刪整段 */}
-    <div className="flex flex-wrap gap-2 mb-3">
-      {TYPES.map((t) => (
-        <button
-          key={t}
-          onClick={() =>
-            setDraftMoves((prev) =>
-              prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
-            )
-          }
-          className={`px-3 py-1 rounded-full text-sm shadow border ${
-            draftMoves.includes(t) ? "ring-2 ring-black" : ""
-          } ${TYPE_COLORS[t] || "bg-gray-200 text-black"}`}
-        >
-          {TYPE_ZH[t]}
-        </button>
-      ))}
-    </div>
-  </CardContent>
-</Card>
+                {/* 型色按鈕區（可選） */}
+                <div className="flex flex-wrap gap-2 mb-3">
+                  {TYPES.map((t) => (
+                    <button
+                      key={t}
+                      onClick={() =>
+                        setDraftMoves((prev) =>
+                          prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
+                        )
+                      }
+                      className={`px-3 py-1 rounded-full text-sm shadow border ${
+                        draftMoves.includes(t) ? "ring-2 ring-black" : ""
+                      } ${TYPE_COLORS[t] || "bg-gray-200 text-black"}`}
+                    >
+                      {TYPE_ZH[t]}
+                    </button>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
 
 
           <Card className="rounded-2xl">
@@ -452,10 +537,13 @@ export default function App(){
                 <ul className="space-y-2">
                   {team.map(m=> (
                     <li key={m.id} className="flex items-center justify-between bg-zinc-50 border rounded-xl p-2">
-                      <div>
-                        <div className="text-sm font-medium">{m.name}</div>
+                      <div className="flex items-center gap-3">
+                        <TeamAvatar name={m.name} dex={m.dex} size={64} />
                         <div>
-                          {m.moves.map(t=> <TypeBadge key={m.id+':'+t} t={t} />)}
+                          <div className="text-sm font-medium">{m.name}</div>
+                          <div>
+                            {m.moves.map(t=> <TypeBadge key={m.id+':'+t} t={t} />)}
+                          </div>
                         </div>
                       </div>
                       <Button className="h-9 px-3" variant="destructive" onClick={()=>removeMate(m.id)}>刪除</Button>

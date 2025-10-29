@@ -116,9 +116,9 @@ export default function App() {
       </p>
 
       <Tabs defaultValue="enemy" className="w-full">
-        <TabsList className="tabs-list">
-          <TabsTrigger value="enemy">對手查詢</TabsTrigger>
-          <TabsTrigger value="team">我的隊伍</TabsTrigger>
+        <TabsList className="w-full grid grid-cols-2 mb-3 rounded-xl bg-zinc-100 p-1">
+          <TabsTrigger value="enemy" className="tabs-trigger">對手查詢</TabsTrigger>
+          <TabsTrigger value="team" className="tabs-trigger">我的隊伍</TabsTrigger>
         </TabsList>
 
         {/* 對手查詢 */}

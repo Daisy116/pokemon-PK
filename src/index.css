@@ -26,7 +26,12 @@ body { @apply text-zinc-900 bg-white; }
   .btn-white { @apply bg-white; }
 
   .tabs-trigger { @apply text-sm rounded-lg text-zinc-700; }
-  .tabs-trigger[data-state="active"] { @apply bg-zinc-900 text-white shadow font-medium; }
+  .tabs-trigger[data-state="active"] {
+    background-color: rgb(24 24 27); /* zinc-900 */
+    color: white;
+    font-weight: 500;
+    box-shadow: 0 0 0 1px rgba(0,0,0,0.1);
+  }
 }
 .btn-secondary { @apply bg-zinc-100 hover:bg-zinc-200; }
 .btn:disabled { @apply opacity-50 pointer-events-none; }

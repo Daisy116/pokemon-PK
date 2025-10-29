@@ -24,6 +24,9 @@ body { @apply text-zinc-900 bg-white; }
 
   /* 需要白底的地方才另外加這個 class */
   .btn-white { @apply bg-white; }
+
+  .tabs-trigger { @apply text-sm rounded-lg text-zinc-700; }
+  .tabs-trigger[data-state="active"] { @apply bg-zinc-900 text-white shadow font-medium; }
 }
 .btn-secondary { @apply bg-zinc-100 hover:bg-zinc-200; }
 .btn:disabled { @apply opacity-50 pointer-events-none; }

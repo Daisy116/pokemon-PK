@@ -21,7 +21,9 @@
       ]
     }
   },
+  "types": ["vite/client"],   // 如果原本有 types，請把它加進來
   "include": [
-    "src"
+    "src", 
+    "pokedex"
   ]
 }

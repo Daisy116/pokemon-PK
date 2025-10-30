@@ -5,6 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Badge } from "./components/ui/badge";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
 
+const pokedexURL = `${import.meta.env.BASE_URL}pokedex/`;
+
 /* =========================
    圖片來源優先順序（支援你放在 public/pokemon 的圖庫）
    1) 本機：/pokemon/XXX.png（優先嘗試 3 位數補零，例如 006.png，其次 6.png）
@@ -406,6 +408,17 @@ export default function App(){
     <div className="theme-space bg-cover bg-center">
       <div className="text-zinc-900 min-h-screen py-4 px-8 max-w-md mx-auto">
         <h1 className="text-xl text-white font-bold">寶可夢屬性相剋查詢器</h1>
+         <div className="mt-2 mb-3 flex items-center gap-2">
+  <a
+    href={pokedexURL}
+    className="inline-flex items-center gap-1 rounded-full bg-white/80 hover:bg-white text-zinc-900 border border-zinc-300 px-3 py-1 text-xs font-medium transition"
+  >
+    前往【寶可夢圖鑑】新版 →
+  </a>
+  <span className="text-[11px] text-white/80">（目前頁面：屬性相剋查詢器）</span>
+</div>
+
+         
       <p className="text-sm text-white mb-3">【對手查詢】：輸入對手名稱或手動選屬性，立即看弱點。 <br/>【我的隊伍】：維護你的隊伍招式屬性，幫你推薦上場人選。</p>
 
       {/* 頁首分頁：對手查詢 / 我的隊伍 */}

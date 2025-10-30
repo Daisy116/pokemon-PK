@@ -403,8 +403,9 @@ export default function App(){
   function removeMate(id:string){ setTeam(team.filter(x=>x.id!==id)); }
 
   return (
-    <div className="theme-space bg-cover bg-center text-zinc-900 min-h-screen py-4 px-8 max-w-md mx-auto">
-      <h1 className="text-xl text-white font-bold">寶可夢屬性相剋查詢器</h1>
+    <div className="theme-space bg-cover bg-center">
+      <div className="text-zinc-900 min-h-screen py-4 px-8 max-w-md mx-auto">
+        <h1 className="text-xl text-white font-bold">寶可夢屬性相剋查詢器</h1>
       <p className="text-sm text-white mb-3">【對手查詢】：輸入對手名稱或手動選屬性，立即看弱點。 <br/>【我的隊伍】：維護你的隊伍招式屬性，幫你推薦上場人選。</p>
 
       {/* 頁首分頁：對手查詢 / 我的隊伍 */}
@@ -571,6 +572,7 @@ export default function App(){
       </Tabs>
 
       <footer className="text-[10px] text-zinc-400 mt-6">資料來源：PokeAPI。第一次用中文名稱查詢時會建立索引並快取到本機。</footer>
+      </div>
     </div>
   );
 }

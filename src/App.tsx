@@ -571,7 +571,7 @@ export default function App(){
         </TabsContent>
       </Tabs>
 
-      <footer className="fixed bottom-0 left-0   w-full bg-black/30 text-center py-2">資料來源：PokeAPI。第一次用中文名稱查詢時會建立索引並快取到本機。</footer>
+      <footer className="fixed bottom-0 left-0 w-full bg-black/30 text-center py-2 text-[10px] text-white">資料來源：PokeAPI。第一次用中文名稱查詢時會建立索引並快取到本機。</footer>
       </div>
     </div>
   );

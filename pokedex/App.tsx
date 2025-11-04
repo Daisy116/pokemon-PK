@@ -429,22 +429,45 @@ export default function App() {
         <TabBtn active={activeTab === "evo"} onClick={() => setActiveTab("evo")}>進化條件</TabBtn>
       </div>
 
-      <div className="mb-4 grid grid-cols-1 lg:grid-cols-3 gap-3">
-        <div className="flex items-center gap-2">
-          <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="搜尋寶可夢名稱…" className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-900" />
-          <label className="flex items-center gap-2 text-xs text-zinc-700 whitespace-nowrap">
-            <input type="checkbox" checked={onlyAlpha} onChange={(e) => setOnlyAlpha(e.target.checked)} />只看頭目
-          </label>
-          <select value={caughtFilter} onChange={(e) => setCaughtFilter(e.target.value as any)} className="rounded-lg border border-zinc-200 px-2 py-2 text-xs">
-            <option value="all">全部</option>
-            <option value="caught">只顯示已捕捉</option>
-            <option value="uncaught">只顯示未捕捉</option>
-          </select>
+      {/* 工具列（搜尋 / 篩選）＋ 我的隊伍 */}
+      <div className="mb-4 space-y-3">
+        {/* 搜尋＋篩選：小螢幕直排，大螢幕橫排 */}
+        <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="搜尋寶可夢名稱…"
+            className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-900"
+          />
+          <div className="flex items-center gap-2">
+            <label className="flex items-center gap-2 text-xs text-zinc-700 whitespace-nowrap">
+              <input
+                type="checkbox"
+                checked={onlyAlpha}
+                onChange={(e) => setOnlyAlpha(e.target.checked)}
+              />
+              只看頭目
+            </label>
+            <select
+              value={caughtFilter}
+              onChange={(e) => setCaughtFilter(e.target.value as any)}
+              className="rounded-lg border border-zinc-200 px-2 py-2 text-xs"
+            >
+              <option value="all">全部</option>
+              <option value="caught">只顯示已捕捉</option>
+              <option value="uncaught">只顯示未捕捉</option>
+            </select>
+          </div>
         </div>
 
-        <div className="lg:col-span-2">
-          <TeamBar team={team} nameById={nameById} onRemove={removeFromTeam} onClear={clearTeam} alphaMap={alphaMap} />
-        </div>
+        {/* 我的隊伍：永遠佔滿一整行 */}
+        <TeamBar
+          team={team}
+          nameById={nameById}
+          onRemove={removeFromTeam}
+          onClear={clearTeam}
+          alphaMap={alphaMap}
+        />
       </div>
 
       {activeTab === "zones" && (
@@ -519,17 +542,52 @@ const ZonesView: React.FC<{ zones: WildZone[]; alphaMap: AlphaMap; onlyAlpha: bo
                   </div>
                 )}
                 {filtered.map((m) => (
-                  <div key={m.id} className="flex items-center justify-between rounded-xl border border-zinc-200 p-2">
+                  <div
+                    key={m.id}
+                    className="flex flex-col sm:flex-row sm:items-center sm:justify-between rounded-xl border border-zinc-200 p-2"
+                  >
                     <div className="flex items-center gap-3">
-                      <img src={m.image || spriteUrlByDex(25)} alt={m.displayName} className="h-12 w-12 rounded-lg object-contain bg-white" />
+                      {/* 左邊：圖片＋名字＋屬性 */}
+                      <img
+                        src={m.image || spriteUrlByDex(25)}
+                        alt={m.displayName}
+                        className="h-12 w-12 rounded-lg object-contain bg-white"
+                      />
                       <div>
-                        <div className="text-sm font-medium flex items-center gap-2"><span>{m.displayName}</span>{m.enName && <span className="text-[10px] text-zinc-500">{m.enName}</span>}{(alphaMap[m.id] || m.alpha) && <Tag>頭目</Tag>}</div>
-                        <div className="flex flex-wrap gap-1 mt-1">{(m.types || []).map((t) => (<Tag key={t} typeName={t}>{t}</Tag>))}</div>
+                        <div className="text-sm font-medium flex items-center gap-2">
+                          <span>{m.displayName}</span>
+                          {m.enName && <span className="text-[10px] text-zinc-500">{m.enName}</span>}
+                          {(alphaMap[m.id] || m.alpha) && <Tag>頭目</Tag>}
+                        </div>
+                        <div className="flex flex-wrap gap-1 mt-1">
+                          {(m.types || []).map((t) => (
+                            <Tag key={t} typeName={t}>{t}</Tag>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <button onClick={() => onToggleAlpha(m.id)} className={`text-xs px-2 py-1 rounded-lg border ${(alphaMap[m.id] || m.alpha) ? "bg-amber-100 border-amber-200" : "border-zinc-200"}`}>頭目</button>
-                      <button onClick={() => onAddTeam(m.id)} disabled={inTeam(m.id)} className={`text-xs px-2 py-1 rounded-lg border ${inTeam(m.id) ? "bg-emerald-100 border-emerald-200 text-emerald-700" : "border-zinc-200"} disabled:opacity-40`}>{inTeam(m.id) ? "已在隊伍" : "加入隊伍"}</button>
+
+                    {/* 右邊：按鈕（小螢幕掉到下面） */}
+                    <div className="mt-2 sm:mt-0 flex items-center gap-2 sm:justify-end">
+                      <button
+                        onClick={() => onToggleAlpha(m.id)}
+                        className={`text-xs px-2 py-1 rounded-lg border ${
+                          (alphaMap[m.id] || m.alpha) ? "bg-amber-100 border-amber-200" : "border-zinc-200"
+                        }`}
+                      >
+                        頭目
+                      </button>
+                      <button
+                        onClick={() => onAddTeam(m.id)}
+                        disabled={inTeam(m.id)}
+                        className={`text-xs px-2 py-1 rounded-lg border ${
+                          inTeam(m.id)
+                            ? "bg-emerald-100 border-emerald-200 text-emerald-700"
+                            : "border-zinc-200"
+                        } disabled:opacity-40`}
+                      >
+                        {inTeam(m.id) ? "已在隊伍" : "加入隊伍"}
+                      </button>
                     </div>
                   </div>
                 ))}

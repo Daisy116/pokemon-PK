@@ -1,0 +1,20 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* =========================
+   全域基底
+   ========================= */
+html, body, #root {
+  height: 100%;
+}
+body {
+  @apply text-zinc-900 bg-white;
+}
+
+/* =========================
+   自訂元件
+   ========================= */
+button {
+  @apply transition;
+}

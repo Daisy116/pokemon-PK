@@ -567,28 +567,46 @@ const ZonesView: React.FC<{ zones: WildZone[]; alphaMap: AlphaMap; onlyAlpha: bo
                       </div>
                     </div>
 
-                    {/* 右邊：按鈕（小螢幕掉到下面） */}
-                    <div className="mt-2 sm:mt-0 flex items-center gap-2 sm:justify-end">
+                     {/* 按鈕區塊：手機加分隔線，按鈕改成更像「行為」的樣式 */}
+                    <div
+                      className="
+                        mt-2 pt-2 border-t border-zinc-100
+                        flex items-center gap-2 justify-end
+                        sm:mt-0 sm:pt-0 sm:border-0
+                      "
+                    >
+                      {/* 頭目切換 */}
                       <button
                         onClick={() => onToggleAlpha(m.id)}
-                        className={`text-xs px-2 py-1 rounded-lg border ${
-                          (alphaMap[m.id] || m.alpha) ? "bg-amber-100 border-amber-200" : "border-zinc-200"
-                        }`}
+                        className={
+                          "text-xs px-3 py-1 rounded-full border " +
+                          ((alphaMap[m.id] || m.alpha)
+                            ? "bg-amber-100 border-amber-300 text-amber-700"
+                            : "bg-white border-zinc-200 text-zinc-600")
+                        }
                       >
                         頭目
                       </button>
+
+                      {/* 加入 / 已在隊伍 */}
                       <button
                         onClick={() => onAddTeam(m.id)}
                         disabled={inTeam(m.id)}
-                        className={`text-xs px-2 py-1 rounded-lg border ${
-                          inTeam(m.id)
+                        className={
+                          "text-xs px-3 py-1 rounded-full border transition " +
+                          (inTeam(m.id)
                             ? "bg-emerald-100 border-emerald-200 text-emerald-700"
-                            : "border-zinc-200"
-                        } disabled:opacity-40`}
+                            : "bg-emerald-500 border-emerald-500 text-white hover:bg-emerald-600") +
+                          " disabled:opacity-60"
+                        }
                       >
                         {inTeam(m.id) ? "已在隊伍" : "加入隊伍"}
                       </button>
                     </div>
+
+
+
+
                   </div>
                 ))}
               </div>

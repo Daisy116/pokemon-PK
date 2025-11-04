@@ -4,6 +4,7 @@ export default {
     './index.html',
     './src/**/*.{ts,tsx,js,jsx}',
     './components/**/*.{ts,tsx,js,jsx}',
+    "./pokedex/**/*.{js,ts,jsx,tsx}",
   ],
   theme: { extend: {} },
   plugins: [],

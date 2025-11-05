@@ -56,6 +56,29 @@ const TYPE_COLOR: Record<string, string> = {
   妖精: "bg-rose-200 text-rose-800",
 };
 
+// 中文屬性 → 英文屬性（給 my_team 的 moves 用）
+const TYPE_ZH_TO_EN: Record<string, string> = {
+  一般: "normal",
+  火: "fire",
+  水: "water",
+  草: "grass",
+  電: "electric",
+  冰: "ice",
+  格鬥: "fighting",
+  毒: "poison",
+  地面: "ground",
+  飛行: "flying",
+  超能力: "psychic",
+  蟲: "bug",
+  岩石: "rock",
+  幽靈: "ghost",
+  龍: "dragon",
+  惡: "dark",
+  鋼: "steel",
+  妖精: "fairy",
+};
+
+
 // 和根目錄 App 共用的 my_team 格式
 type MyTeamEntry = { id: string; name: string; moves: string[]; dex?: number };
 const MY_TEAM_KEY = "my_team";

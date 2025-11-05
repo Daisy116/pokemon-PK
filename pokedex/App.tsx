@@ -56,6 +56,10 @@ const TYPE_COLOR: Record<string, string> = {
   妖精: "bg-rose-200 text-rose-800",
 };
 
+// 和根目錄 App 共用的 my_team 格式
+type MyTeamEntry = { id: string; name: string; moves: string[]; dex?: number };
+const MY_TEAM_KEY = "my_team";
+
 // ------------------------------
 // DATA — 先放示例，格式已就緒，之後可直接擴充
 // ------------------------------
@@ -353,13 +357,103 @@ type TeamState = { order: MonId[] };
 const LS_KEYS = { team: "za_team", alpha: "za_alpha_map" };
 type AlphaMap = Record<MonId, boolean>;
 
+// 從 my_team（根目錄那頁的格式）轉成這個檔案的 TeamState
+function buildTeamStateFromMyTeam(): TeamState | null {
+  try {
+    const raw = localStorage.getItem(MY_TEAM_KEY);
+    if (!raw) return null;
+
+    const arr: MyTeamEntry[] = JSON.parse(raw);
+    if (!Array.isArray(arr)) return null;
+
+    const names = arr.map((e) => e.name);
+    const order: MonId[] = [];
+
+    WILD_ZONES.forEach((z) =>
+      z.mons.forEach((m) => {
+        if (names.includes(m.displayName) && !order.includes(m.id)) {
+          order.push(m.id);
+        }
+      })
+    );
+
+    return { order };
+  } catch {
+    return null;
+  }
+}
+
+// 把目前 TeamState 同步回 my_team，給根目錄那頁使用
+function syncMyTeamFromState(team: TeamState) {
+  try {
+    const list: MyTeamEntry[] = [];
+
+    team.order.forEach((id, idx) => {
+      const mon =
+        WILD_ZONES.flatMap((z) => z.mons).find((m) => m.id === id);
+      if (!mon) return;
+
+      // 嘗試從圖片 URL 解析 dex 編號（.../25.png）
+      let dex: number | undefined;
+      if (mon.image) {
+        const match = mon.image.match(/\/(\d+)\.png$/);
+        if (match) dex = Number(match[1]);
+      }
+
+      const movesZh = mon.types || [];
+      const movesEn = movesZh.map((t) => TYPE_ZH_TO_EN[t] || "normal");
+      const moves = movesEn.length ? movesEn : ["normal"];
+
+      list.push({
+        id: `${Date.now()}_${idx}`,
+        name: mon.displayName,
+        moves,
+        dex,
+      });
+    });
+
+    localStorage.setItem(MY_TEAM_KEY, JSON.stringify(list));
+  } catch {
+    // ignore
+  }
+}
+
+
 function useLocalStorage<T>(key: string, initial: T) {
   const [state, setState] = useState<T>(() => {
-    try { const raw = localStorage.getItem(key); return raw ? JSON.parse(raw) : initial; } catch { return initial; }
+    try {
+      const raw = localStorage.getItem(key);
+      if (raw) return JSON.parse(raw);
+
+      // 如果是隊伍，沒找到 za_team 就嘗試從 my_team 轉一次
+      if (key === LS_KEYS.team) {
+        const converted = buildTeamStateFromMyTeam();
+        if (converted) {
+          localStorage.setItem(key, JSON.stringify(converted));
+          return converted as T;
+        }
+      }
+
+      return initial;
+    } catch {
+      return initial;
+    }
   });
-  useEffect(() => { try { localStorage.setItem(key, JSON.stringify(state)); } catch {} }, [key, state]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(key, JSON.stringify(state));
+
+      // 如果是隊伍，順便同步一份 my_team 給根目錄那頁用
+      if (key === LS_KEYS.team) {
+        syncMyTeamFromState(state as unknown as TeamState);
+      }
+    } catch {}
+  }, [key, state]);
+
   return [state, setState] as const;
 }
+
 
 // ------------------------------
 // UI 小元件

@@ -482,12 +482,6 @@ export default function App() {
 
   const clearTeam = () => setTeam([]);
 
-  const moveTeam = (idx: number, dir: -1 | 1) => setTeam((t) => {
-    const arr = [...t.order];
-    const j = idx + dir; if (j < 0 || j >= arr.length) return t;
-    [arr[idx], arr[j]] = [arr[j], arr[idx]]; return { order: arr };
-  });
-
   const matchQ = (name: string) => name.toLowerCase().includes(q.trim().toLowerCase());
 
   return (
@@ -742,11 +736,21 @@ const TeamBar: React.FC<{
   return (
     <div className="rounded-2xl border border-zinc-200 p-3">
       <div className="relative flex items-center mb-2">
-        <div className="text-sm font-semibold">我的隊伍（{team.order.length}）</div>
-        <div className="flex items-center gap-2"><button onClick={onClear} className="text-xs px-2 py-1 rounded-lg border border-zinc-200">清空</button></div>
+        <div className="text-sm font-semibold">我的隊伍（{team.length}）</div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={onClear}
+            className="text-xs px-2 py-1 rounded-lg border border-zinc-200"
+          >
+            清空
+          </button>
+        </div>
       </div>
-      {team.order.length === 0 ? (
-        <div className="text-[12px] text-zinc-500">尚未加入任何寶可夢。到列表點「加入隊伍」吧！</div>
+
+      {team.length === 0 ? (
+        <div className="text-[12px] text-zinc-500">
+          尚未加入任何寶可夢。到列表點「加入隊伍」吧！
+        </div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           {team.map((mate) => {
@@ -795,11 +799,8 @@ const TeamBar: React.FC<{
             );
           })}
         </div>
-            );
-          })}
-
-        </div>
       )}
     </div>
   );
 };
+

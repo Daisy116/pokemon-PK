@@ -376,88 +376,14 @@ const EVOLUTIONS: { from: string; to: string; condition: string }[] = [
 // 儲存 / 邏輯
 // ------------------------------
 
-type TeamState = { order: MonId[] };
-const LS_KEYS = { team: "za_team", alpha: "za_alpha_map" };
+const LS_KEYS = { team: "my_team", alpha: "za_alpha_map" };
 type AlphaMap = Record<MonId, boolean>;
-
-// 從 my_team（根目錄那頁的格式）轉成這個檔案的 TeamState
-function buildTeamStateFromMyTeam(): TeamState | null {
-  try {
-    const raw = localStorage.getItem(MY_TEAM_KEY);
-    if (!raw) return null;
-
-    const arr: MyTeamEntry[] = JSON.parse(raw);
-    if (!Array.isArray(arr)) return null;
-
-    const names = arr.map((e) => e.name);
-    const order: MonId[] = [];
-
-    WILD_ZONES.forEach((z) =>
-      z.mons.forEach((m) => {
-        if (names.includes(m.displayName) && !order.includes(m.id)) {
-          order.push(m.id);
-        }
-      })
-    );
-
-    return { order };
-  } catch {
-    return null;
-  }
-}
-
-// 把目前 TeamState 同步回 my_team，給根目錄那頁使用
-function syncMyTeamFromState(team: TeamState) {
-  try {
-    const list: MyTeamEntry[] = [];
-
-    team.order.forEach((id, idx) => {
-      const mon =
-        WILD_ZONES.flatMap((z) => z.mons).find((m) => m.id === id);
-      if (!mon) return;
-
-      // 嘗試從圖片 URL 解析 dex 編號（.../25.png）
-      let dex: number | undefined;
-      if (mon.image) {
-        const match = mon.image.match(/\/(\d+)\.png$/);
-        if (match) dex = Number(match[1]);
-      }
-
-      const movesZh = mon.types || [];
-      const movesEn = movesZh.map((t) => TYPE_ZH_TO_EN[t] || "normal");
-      const moves = movesEn.length ? movesEn : ["normal"];
-
-      list.push({
-        id: `${Date.now()}_${idx}`,
-        name: mon.displayName,
-        moves,
-        dex,
-      });
-    });
-
-    localStorage.setItem(MY_TEAM_KEY, JSON.stringify(list));
-  } catch {
-    // ignore
-  }
-}
-
 
 function useLocalStorage<T>(key: string, initial: T) {
   const [state, setState] = useState<T>(() => {
     try {
       const raw = localStorage.getItem(key);
-      if (raw) return JSON.parse(raw);
-
-      // 如果是隊伍，沒找到 za_team 就嘗試從 my_team 轉一次
-      if (key === LS_KEYS.team) {
-        const converted = buildTeamStateFromMyTeam();
-        if (converted) {
-          localStorage.setItem(key, JSON.stringify(converted));
-          return converted as T;
-        }
-      }
-
-      return initial;
+      return raw ? JSON.parse(raw) : initial;
     } catch {
       return initial;
     }
@@ -466,16 +392,12 @@ function useLocalStorage<T>(key: string, initial: T) {
   useEffect(() => {
     try {
       localStorage.setItem(key, JSON.stringify(state));
-
-      // 如果是隊伍，順便同步一份 my_team 給根目錄那頁用
-      if (key === LS_KEYS.team) {
-        syncMyTeamFromState(state as unknown as TeamState);
-      }
     } catch {}
   }, [key, state]);
 
   return [state, setState] as const;
 }
+
 
 
 // ------------------------------
@@ -506,7 +428,7 @@ const MoveButtons: React.FC<{ onUp: () => void; onDown: () => void; disabledUp?:
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<"zones" | "evo">("zones");
-  const [team, setTeam] = useLocalStorage<TeamState>(LS_KEYS.team, { order: [] });
+  const [team, setTeam] = useLocalStorage<MyTeamEntry[]>(LS_KEYS.team, []);
   const [alphaMap, setAlphaMap] = useLocalStorage<AlphaMap>(LS_KEYS.alpha, {});
   const [q, setQ] = useState("");
   const [onlyAlpha, setOnlyAlpha] = useState(false);
@@ -518,12 +440,47 @@ export default function App() {
     return list;
   }, []);
 
-  const inTeam = (id: MonId) => team.order.includes(id);
+  const inTeam = (id: MonId) => {
+    const mon = flatMons.find((m) => m.id === id);
+    if (!mon) return false;
+    return team.some((t) => t.name === mon.displayName);
+  };
+
   const toggleAlpha = (id: MonId) => setAlphaMap((m) => ({ ...m, [id]: !m[id] }));
 
-  const addToTeam = (id: MonId) => setTeam((t) => (t.order.includes(id) ? t : { order: [...t.order, id] }));
-  const removeFromTeam = (id: MonId) => setTeam((t) => ({ order: t.order.filter((x) => x !== id) }));
-  const clearTeam = () => setTeam({ order: [] });
+  const addToTeam = (id: MonId) =>
+    setTeam((prev) => {
+      const mon = flatMons.find((m) => m.id === id);
+      if (!mon) return prev;
+
+      // 已經在隊伍裡就不再加入
+      if (prev.some((t) => t.name === mon.displayName)) return prev;
+
+      // 從圖片 URL 抓 dex 編號（.../25.png）
+      let dex: number | undefined;
+      if (mon.image) {
+        const match = mon.image.match(/\/(\d+)\.png$/);
+        if (match) dex = Number(match[1]);
+      }
+
+      const movesZh = mon.types || [];
+      const movesEn = movesZh.map((t) => TYPE_ZH_TO_EN[t] || "normal");
+      const moves = movesEn.length ? movesEn : ["normal"];
+
+      const newEntry: MyTeamEntry = {
+        id: `${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+        name: mon.displayName,
+        moves,
+        dex,
+      };
+
+      return [...prev, newEntry];
+    });
+
+  const removeFromTeam = (memberId: string) =>
+    setTeam((prev) => prev.filter((t) => t.id !== memberId));
+
+  const clearTeam = () => setTeam([]);
 
   const moveTeam = (idx: number, dir: -1 | 1) => setTeam((t) => {
     const arr = [...t.order];
@@ -532,7 +489,6 @@ export default function App() {
   });
 
   const matchQ = (name: string) => name.toLowerCase().includes(q.trim().toLowerCase());
-  const nameById = (id: MonId) => flatMons.find((m) => m.id === id)?.displayName || id;
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 p-3 sm:p-6">
@@ -580,7 +536,6 @@ export default function App() {
         {/* 我的隊伍：永遠佔滿一整行 */}
         <TeamBar
           team={team}
-          nameById={nameById}
           onRemove={removeFromTeam}
           onClear={clearTeam}
           alphaMap={alphaMap}
@@ -778,7 +733,12 @@ const EvolutionView: React.FC<{ list: { from: string; to: string; condition: str
 // 隊伍列（沒上限）
 // ------------------------------
 
-const TeamBar: React.FC<{ team: TeamState; nameById: (id: MonId) => string; onRemove: (id: MonId) => void; onClear: () => void; alphaMap: AlphaMap; }> = ({ team, nameById, onRemove, onClear, alphaMap }) => {
+const TeamBar: React.FC<{
+  team: MyTeamEntry[];
+  onRemove: (id: string) => void;
+  onClear: () => void;
+  alphaMap: AlphaMap;
+}> = ({ team, onRemove, onClear, alphaMap }) => {
   return (
     <div className="rounded-2xl border border-zinc-200 p-3">
       <div className="relative flex items-center mb-2">
@@ -789,41 +749,54 @@ const TeamBar: React.FC<{ team: TeamState; nameById: (id: MonId) => string; onRe
         <div className="text-[12px] text-zinc-500">尚未加入任何寶可夢。到列表點「加入隊伍」吧！</div>
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
-          {team.order.map((id) => {
-  const hit = WILD_ZONES.flatMap(z => z.mons).find(m => m.id === id);
+          {team.map((mate) => {
+            const hit = WILD_ZONES.flatMap((z) => z.mons).find(
+              (m) => m.displayName === mate.name
+            );
+            const alphaFlag = hit ? alphaMap[hit.id] || hit.alpha : false;
 
-  return (
-    <div key={id} className="relative flex items-center rounded-xl border border-zinc-200 p-2">
-      <div className="flex items-center gap-3">
-        <img
-          src={hit?.image || spriteUrlByDex(25)}
-          alt={hit?.displayName || nameById(id)}
-          className="h-12 w-12 rounded-lg object-contain bg-white"
-        />
-        <div>
-          <div className="text-sm font-medium">{hit?.displayName || nameById(id)}</div>
+            return (
+              <div
+                key={mate.id}
+                className="relative flex items-center rounded-xl border border-zinc-200 p-2"
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src={
+                      hit?.image ||
+                      (typeof mate.dex === "number"
+                        ? spriteUrlByDex(mate.dex)
+                        : spriteUrlByDex(25))
+                    }
+                    alt={mate.name}
+                    className="h-12 w-12 rounded-lg object-contain bg-white"
+                  />
+                  <div>
+                    <div className="text-sm font-medium">{mate.name}</div>
+                    <div className="flex flex-wrap gap-1 mt-1">
+                      {(hit?.types || []).map((t) => (
+                        <Tag key={t} typeName={t}>
+                          {t}
+                        </Tag>
+                      ))}
+                      {alphaFlag && <Tag>頭目</Tag>}
+                    </div>
+                  </div>
+                </div>
 
-          {/* 這裡加「頭目」判斷 */}
-          <div className="flex flex-wrap gap-1 mt-1">
-            {(hit?.types || []).map((t) => (
-              <Tag key={t} typeName={t}>{t}</Tag>
-            ))}
-            {(alphaMap[id] || hit?.alpha) && <Tag>頭目</Tag>}
-          </div>
+                <button
+                  onClick={() => onRemove(mate.id)}
+                  className="absolute top-1 right-1 h-6 w-6 rounded-full border border-zinc-200 text-zinc-500 hover:bg-zinc-50"
+                  aria-label="移除"
+                >
+                  ×
+                </button>
+              </div>
+            );
+          })}
         </div>
-      </div>
-
-      {/* 右上角 X（父層要 relative 才定位正確） */}
-      <button
-        onClick={() => onRemove(id)}
-        className="absolute top-1 right-1 h-6 w-6 rounded-full border border-zinc-200 text-zinc-500 hover:bg-zinc-50"
-        aria-label="移除"
-      >
-        ×
-      </button>
-    </div>
-  );
-})}
+            );
+          })}
 
         </div>
       )}

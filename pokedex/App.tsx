@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { EVOLUTIONS, EvolutionRecord } from "../src/evolutions";
 
 /**
  * Pokémon 野生特區小程序
@@ -304,27 +305,6 @@ const FIXED_ALPHAS: ZoneMon[] = [
   { id: "alpha-rapidash", displayName: "烈焰馬", enName: "Rapidash", types: ["火"], image: spriteUrlByDex(78) },
   { id: "alpha-gyarados", displayName: "暴鯉龍", enName: "Gyarados", types: ["水", "飛行"], image: spriteUrlByDex(130) },
   { id: "alpha-scyther", displayName: "飛天螳螂", enName: "Scyther", types: ["蟲", "飛行"], image: spriteUrlByDex(123) },
-];
-
-// 進化條件：使用「中文名字」對應 displayName
-type EvolutionRecord = { from: string; to: string; condition: string };
-
-const EVOLUTIONS: EvolutionRecord[] = [
-  { from: "伊布", to: "水伊布", condition: "使用水之石" },
-  { from: "伊布", to: "雷伊布", condition: "使用雷之石" },
-  { from: "伊布", to: "月伊布", condition: "高好感＋夜晚升級" },
-  { from: "伊布", to: "太陽伊布", condition: "高好感＋白天升級" },
-  { from: "利歐路", to: "路卡利歐", condition: "高好感＋白天升級" },
-
-  // 範例：菊草葉 → 月桂葉 → 大竺葵 → 超級大竺葵
-  { from: "菊草葉", to: "月桂葉", condition: "等級 16" },
-  { from: "月桂葉", to: "大竺葵", condition: "等級 32" },
-  { from: "大竺葵", to: "超級大竺葵", condition: "持有超級石進化" },
-  { from: "獨角蟲", to: "鐵殼蛹", condition: "等級 7" },
-  { from: "鐵殼蛹", to: "大針蜂", condition: "等級 10" },
-  { from: "大針蜂", to: "超級大針蜂", condition: "主任務16，持有超級石進化" },
-
-  // ...請依官方/攻略補齊 ZA 版本特殊條件（記得 from / to 用「中文名字」）
 ];
 
 // ------------------------------

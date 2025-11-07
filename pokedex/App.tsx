@@ -3,7 +3,7 @@ import { EVOLUTIONS, EvolutionRecord } from "../src/evolutions";
 import { WILD_ZONES, WildZone, ZoneMon } from "./wildZone";
 import { MONDEX_BY_NAME_ZH } from "../src/monInfo";
 
-const homeURL = `${import.meta.env.BASE_URL}`;
+const homeURL = "https://daisy116.github.io/pokemon-PK/";
 
 /**
  * Pokémon 野生特區小程序
@@ -704,3 +704,4 @@ const TeamBar: React.FC<{
   );
 
 };
+

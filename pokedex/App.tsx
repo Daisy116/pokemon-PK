@@ -3,6 +3,8 @@ import { EVOLUTIONS, EvolutionRecord } from "../src/evolutions";
 import { WILD_ZONES, WildZone, ZoneMon } from "./wildZone";
 import { MONDEX_BY_NAME_ZH } from "../src/monInfo";
 
+const homeURL = `${import.meta.env.BASE_URL}`;
+
 /**
  * Pokémon 野生特區小程序
  *
@@ -196,6 +198,12 @@ export default function App() {
       <header className="mb-4">
         <h1 className="text-xl font-bold">Pokémon Legends ZA — 野生特區小程序</h1>
         <p className="text-sm text-zinc-600">快速勾選已捕捉、加入隊伍與進化條件。</p>
+          <a
+            href={homeURL}
+            className="inline-flex items-center gap-1 rounded-full bg-white/80 hover:bg-white text-zinc-900 border border-zinc-300 px-3 py-1 text-xs font-medium transition"
+          >
+            返回首頁 →
+          </a>
       </header>
 
       <div className="flex items-center gap-2 mb-4">
@@ -694,4 +702,5 @@ const TeamBar: React.FC<{
       )}
     </div>
   );
+
 };

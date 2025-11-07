@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { EVOLUTIONS, EvolutionRecord } from "../src/evolutions";
 import { WILD_ZONES, WildZone, ZoneMon } from "./wildZone";
+import { MONDEX_BY_NAME_ZH } from "../src/monInfo";
 
 /**
  * Pokémon 野生特區小程序
@@ -39,6 +40,29 @@ const MY_TEAM_KEY = "my_team";
 // ------------------------------
 
 export type MonId = string;
+
+// 利用中文名，從「野生特區」或「圖鑑資料」拿到一個 ZoneMon 風格的物件
+const getMonByName = (
+  nameZh: string,
+  flatMons: ZoneMon[]
+): ZoneMon | null => {
+  // 1) 先從 WILD_ZONES 裡找（如果那隻本來就會出現在野生特區）
+  const fromWild = flatMons.find((m) => m.displayName === nameZh);
+  if (fromWild) return fromWild;
+
+  // 2) 找不到就去查小圖鑑（monInfo.ts）
+  const basic = MONDEX_BY_NAME_ZH[nameZh];
+  if (!basic) return null;
+
+  // 3) 組成一個 ZoneMon 物件（id 給個穩定字串即可）
+  return {
+    id: `dex-${basic.dex}`,
+    displayName: basic.nameZh,
+    enName: basic.nameEn,
+    types: basic.types,
+    image: spriteUrlByDex(basic.dex),
+  };
+};
 
 
 // 固定頭目（暫時沒用到，但先保留）
@@ -438,8 +462,9 @@ const EvolutionView: React.FC<{
       if (keyword && !textToSearch.includes(keyword)) return;
 
       const current = map.get(r.from);
-      const fromMon = current?.fromMon ?? flatMons.find((m) => m.displayName === r.from) ?? null;
-      const toMon = flatMons.find((m) => m.displayName === r.to) ?? null;
+      const fromMon =
+        current?.fromMon ?? getMonByName(r.from, flatMons);
+      const toMon = getMonByName(r.to, flatMons);
 
       const next = current ?? { fromMon, records: [] };
       next.records.push({ record: r, toMon, cat: condCat });

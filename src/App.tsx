@@ -7,6 +7,26 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
 
 const pokedexURL = `${import.meta.env.BASE_URL}pokedex/`;
 
+// 頁籤按鈕（跟 pokedex 的一模一樣）
+const TabBtn: React.FC<{
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}> = ({ active, onClick, children }) => (
+  <button
+    onClick={onClick}
+    className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${
+      active
+        ? "bg-zinc-900 text-white border-zinc-900"
+        : "bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"
+    }`}
+  >
+    {children}
+  </button>
+);
+
+
+
 /* =========================
    圖片來源優先順序（支援你放在 public/pokemon 的圖庫）
    1) 本機：/pokemon/XXX.png（優先嘗試 3 位數補零，例如 006.png，其次 6.png）
@@ -329,6 +349,7 @@ export default function App(){
   const [enemyId, setEnemyId] = useState<number|null>(null);
   const [loading, setLoading] = useState(false);
   const [manual, setManual] = useState<string[]>([]); // 手動指定對手屬性（最多 2）
+  const [mode, setMode] = useState<"opponent" | "myTeam">("opponent");
 
   // --- 我的隊伍（以招式屬性為主） ---
   type TeamMate = { id: string; name: string; moves: string[]; dex?: number };
@@ -422,11 +443,19 @@ export default function App(){
       <p className="text-sm text-white mb-3">【對手查詢】：輸入對手名稱或手動選屬性，立即看弱點。 <br/>【我的隊伍】：維護你的隊伍招式屬性，幫你推薦上場人選。</p>
 
       {/* 頁首分頁：對手查詢 / 我的隊伍 */}
-      <Tabs defaultValue="enemy" className="w-full">
+      {/* <Tabs defaultValue="enemy" className="w-full">
         <TabsList className="w-full grid grid-cols-2 mb-3 rounded-xl bg-zinc-100 p-1">
           <TabsTrigger value="enemy" className="tabs-trigger">對手查詢</TabsTrigger>
           <TabsTrigger value="team" className="tabs-trigger">我的隊伍</TabsTrigger>
-        </TabsList>
+        </TabsList> */}
+         <div className="flex items-center gap-2 mb-4">
+           <TabBtn active={mode === "opponent"} onClick={() => setMode("opponent")}>
+             對手查詢
+           </TabBtn>
+           <TabBtn active={mode === "myTeam"} onClick={() => setMode("myTeam")}>
+             我的隊伍
+           </TabBtn>
+         </div>
 
         {/* 對手查詢分頁 */}
         <TabsContent value="enemy">

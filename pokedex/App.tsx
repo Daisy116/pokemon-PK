@@ -4,8 +4,6 @@ import { WILD_ZONES, WildZone, ZoneMon } from "./wildZone";
 import { MONDEX_BY_NAME_ZH } from "../src/monInfo";
 
 const homeURL = "https://daisy116.github.io/pokemon-PK/";
-const [selectedTeamIndex, setSelectedTeamIndex] = useState<number | null>(null);
-const [evoSearch, setEvoSearch] = useState(""); // 用來自動帶入搜尋框
 
 /**
  * Pokémon 野生特區小程序
@@ -15,7 +13,7 @@ const [evoSearch, setEvoSearch] = useState(""); // 用來自動帶入搜尋框
  *    - 勾選我已捕捉的物種（支援搜尋 / 篩選 / 展開摺疊）
  *    - 將物種加入隊伍
  *    - 標記是否為頭目級（Alpha）
- * 2) 「進化圖鑑（依隊伍）」：列出目前隊伍中尚可進化者及條件
+ * 2) 「進化圖鑑（依隊伍）」：列出目前隊伍中尚可進化者及條件，並可直接讓隊伍寶可夢進化
  *
  * ✍️ 進化資料補齊說明
  * - EVOLUTIONS 使用「中文名字」對應 WILD_ZONES.mons 的 displayName
@@ -29,11 +27,47 @@ const spriteUrlByDex = (dex: number) =>
   `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${dex}.png`;
 
 const TYPE_COLOR: Record<string, string> = {
-  一般: "bg-zinc-200 text-zinc-800",  火: "bg-red-200 text-red-800",  水: "bg-blue-200 text-blue-800",  草: "bg-green-200 text-green-800",  電: "bg-yellow-200 text-yellow-800",  冰: "bg-cyan-200 text-cyan-800",  格鬥: "bg-orange-200 text-orange-800",毒: "bg-fuchsia-200 text-fuchsia-800",地面: "bg-amber-200 text-amber-900",  飛行: "bg-indigo-200 text-indigo-800",  超能力: "bg-pink-200 text-pink-800",  蟲: "bg-lime-200 text-lime-800",岩石: "bg-stone-300 text-stone-800",  幽靈: "bg-purple-200 text-purple-800",  龍: "bg-sky-300 text-sky-900",  惡: "bg-slate-300 text-slate-900",鋼: "bg-gray-300 text-gray-900",  妖精: "bg-rose-200 text-rose-800",};
+  一般: "bg-zinc-200 text-zinc-800",
+  火: "bg-red-200 text-red-800",
+  水: "bg-blue-200 text-blue-800",
+  草: "bg-green-200 text-green-800",
+  電: "bg-yellow-200 text-yellow-800",
+  冰: "bg-cyan-200 text-cyan-800",
+  格鬥: "bg-orange-200 text-orange-800",
+  毒: "bg-fuchsia-200 text-fuchsia-800",
+  地面: "bg-amber-200 text-amber-900",
+  飛行: "bg-indigo-200 text-indigo-800",
+  超能力: "bg-pink-200 text-pink-800",
+  蟲: "bg-lime-200 text-lime-800",
+  岩石: "bg-stone-300 text-stone-800",
+  幽靈: "bg-purple-200 text-purple-800",
+  龍: "bg-sky-300 text-sky-900",
+  惡: "bg-slate-300 text-slate-900",
+  鋼: "bg-gray-300 text-gray-900",
+  妖精: "bg-rose-200 text-rose-800",
+};
 
 // 中文屬性 → 英文屬性（給 my_team 的 moves 用）
 const TYPE_ZH_TO_EN: Record<string, string> = {
-  一般: "normal",  火: "fire",  水: "water",  草: "grass",  電: "electric",  冰: "ice",  格鬥: "fighting",  毒: "poison",  地面: "ground",  飛行: "flying",超能力: "psychic",  蟲: "bug",  岩石: "rock",  幽靈: "ghost",  龍: "dragon",  惡: "dark",  鋼: "steel",  妖精: "fairy",};
+  一般: "normal",
+  火: "fire",
+  水: "water",
+  草: "grass",
+  電: "electric",
+  冰: "ice",
+  格鬥: "fighting",
+  毒: "poison",
+  地面: "ground",
+  飛行: "flying",
+  超能力: "psychic",
+  蟲: "bug",
+  岩石: "rock",
+  幽靈: "ghost",
+  龍: "dragon",
+  惡: "dark",
+  鋼: "steel",
+  妖精: "fairy",
+};
 
 // 和根目錄 App 共用的 my_team 格式
 type MyTeamEntry = { id: string; name: string; moves: string[]; dex?: number };
@@ -46,10 +80,7 @@ const MY_TEAM_KEY = "my_team";
 export type MonId = string;
 
 // 利用中文名，從「野生特區」或「圖鑑資料」拿到一個 ZoneMon 風格的物件
-const getMonByName = (
-  nameZh: string,
-  flatMons: ZoneMon[]
-): ZoneMon | null => {
+const getMonByName = (nameZh: string, flatMons: ZoneMon[]): ZoneMon | null => {
   // 1) 先從 WILD_ZONES 裡找（如果那隻本來就會出現在野生特區）
   const fromWild = flatMons.find((m) => m.displayName === nameZh);
   if (fromWild) return fromWild;
@@ -68,14 +99,43 @@ const getMonByName = (
   };
 };
 
-
 // 固定頭目（暫時沒用到，但先保留）
 const FIXED_ALPHAS: ZoneMon[] = [
-  { id: "alpha-starmie", displayName: "寶石海星", enName: "Starmie", types: ["水", "超能力"], image: spriteUrlByDex(121) },
-  { id: "alpha-snorlax", displayName: "卡比獸", enName: "Snorlax", types: ["一般"], image: spriteUrlByDex(143) },
-  { id: "alpha-rapidash", displayName: "烈焰馬", enName: "Rapidash", types: ["火"], image: spriteUrlByDex(78) },
-  { id: "alpha-gyarados", displayName: "暴鯉龍", enName: "Gyarados", types: ["水", "飛行"], image: spriteUrlByDex(130) },
-  { id: "alpha-scyther", displayName: "飛天螳螂", enName: "Scyther", types: ["蟲", "飛行"], image: spriteUrlByDex(123) },
+  {
+    id: "alpha-starmie",
+    displayName: "寶石海星",
+    enName: "Starmie",
+    types: ["水", "超能力"],
+    image: spriteUrlByDex(121),
+  },
+  {
+    id: "alpha-snorlax",
+    displayName: "卡比獸",
+    enName: "Snorlax",
+    types: ["一般"],
+    image: spriteUrlByDex(143),
+  },
+  {
+    id: "alpha-rapidash",
+    displayName: "烈焰馬",
+    enName: "Rapidash",
+    types: ["火"],
+    image: spriteUrlByDex(78),
+  },
+  {
+    id: "alpha-gyarados",
+    displayName: "暴鯉龍",
+    enName: "Gyarados",
+    types: ["水", "飛行"],
+    image: spriteUrlByDex(130),
+  },
+  {
+    id: "alpha-scyther",
+    displayName: "飛天螳螂",
+    enName: "Scyther",
+    types: ["蟲", "飛行"],
+    image: spriteUrlByDex(123),
+  },
 ];
 
 // ------------------------------
@@ -108,11 +168,11 @@ function useLocalStorage<T>(key: string, initial: T) {
 // UI 小元件
 // ------------------------------
 
-const TabBtn: React.FC<{ active: boolean; onClick: () => void; children: React.ReactNode }> = ({
-  active,
-  onClick,
-  children,
-}) => (
+const TabBtn: React.FC<{
+  active: boolean;
+  onClick: () => void;
+  children: React.ReactNode;
+}> = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
     className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${
@@ -125,7 +185,10 @@ const TabBtn: React.FC<{ active: boolean; onClick: () => void; children: React.R
   </button>
 );
 
-const Tag: React.FC<{ children: React.ReactNode; typeName?: string }> = ({ children, typeName }) => (
+const Tag: React.FC<{ children: React.ReactNode; typeName?: string }> = ({
+  children,
+  typeName,
+}) => (
   <span
     className={`inline-flex items-center rounded-full px-2 py-0.5 text-[10px] ${
       typeName ? TYPE_COLOR[typeName] : "border border-zinc-200 text-zinc-600"
@@ -143,10 +206,17 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<"zones" | "evo">("zones");
   const [team, setTeam] = useLocalStorage<MyTeamEntry[]>(LS_KEYS.team, []);
   const [alphaMap, setAlphaMap] = useLocalStorage<AlphaMap>(LS_KEYS.alpha, {});
-  const [q, setQ] = useState(evoSearch);
-  useEffect(() => setQ(evoSearch), [evoSearch]);
+  const [q, setQ] = useState("");
   const [onlyAlpha, setOnlyAlpha] = useState(false);
-  const [caughtFilter, setCaughtFilter] = useState<"all" | "caught" | "uncaught">("all");
+  const [caughtFilter, setCaughtFilter] = useState<
+    "all" | "caught" | "uncaught"
+  >("all");
+
+  // 新增：目前選中的隊伍成員 + 進化圖鑑的搜尋字
+  const [selectedTeamIndex, setSelectedTeamIndex] = useState<number | null>(
+    null
+  );
+  const [evoSearch, setEvoSearch] = useState("");
 
   const flatMons = useMemo(() => {
     const list: ZoneMon[] = [];
@@ -160,7 +230,8 @@ export default function App() {
     return team.some((t) => t.name === mon.displayName);
   };
 
-  const toggleAlpha = (id: MonId) => setAlphaMap((m) => ({ ...m, [id]: !m[id] }));
+  const toggleAlpha = (id: MonId) =>
+    setAlphaMap((m) => ({ ...m, [id]: !m[id] }));
 
   const addToTeam = (id: MonId) =>
     setTeam((prev) => {
@@ -194,26 +265,74 @@ export default function App() {
   const removeFromTeam = (memberId: string) =>
     setTeam((prev) => prev.filter((t) => t.id !== memberId));
 
-  const clearTeam = () => setTeam([]);
+  const clearTeam = () => {
+    setTeam([]);
+    setSelectedTeamIndex(null);
+  };
+
+  // 讓隊伍中的某一隻進化為新的名字
+  const handleEvolve = (index: number, fromName: string, toName: string) => {
+    if (!toName) return;
+
+    setTeam((prev) => {
+      if (index < 0 || index >= prev.length) return prev;
+
+      const current = prev[index];
+      // 雖然理論上 fromName 應該一致，但就算不一致也直接覆蓋沒關係
+      const toMon = getMonByName(toName, flatMons);
+      if (!toMon) return prev;
+
+      let dex: number | undefined;
+      if (toMon.image) {
+        const match = toMon.image.match(/\/(\d+)\.png$/);
+        if (match) dex = Number(match[1]);
+      }
+
+      const movesZh = toMon.types || [];
+      const movesEn = movesZh.map((t) => TYPE_ZH_TO_EN[t] || "normal");
+      const moves = movesEn.length ? movesEn : ["normal"];
+
+      const updated: MyTeamEntry = {
+        ...current,
+        name: toMon.displayName,
+        dex,
+        moves,
+      };
+
+      const next = [...prev];
+      next[index] = updated;
+      return next;
+    });
+  };
 
   return (
     <div className="min-h-screen bg-white text-zinc-900 p-3 sm:p-6">
       <header className="mb-4">
-        <h1 className="text-xl font-bold">Pokémon Legends ZA — 野生特區小程序</h1>
-        <p className="text-sm text-zinc-600">快速勾選已捕捉、加入隊伍與進化條件。</p>
-          <a
-            href={homeURL}
-            className="inline-flex items-center gap-1 rounded-full bg-white/80 hover:bg-white text-zinc-900 border border-zinc-300 px-3 py-1 text-xs font-medium transition"
-          >
-            返回首頁 →
-          </a>
+        <h1 className="text-xl font-bold">
+          Pokémon Legends ZA — 野生特區小程序
+        </h1>
+        <p className="text-sm text-zinc-600">
+          快速勾選已捕捉、加入隊伍與進化條件。
+        </p>
+        <a
+          href={homeURL}
+          className="inline-flex items-center gap-1 rounded-full bg-white/80 hover:bg-white text-zinc-900 border border-zinc-300 px-3 py-1 text-xs font-medium transition"
+        >
+          返回首頁 →
+        </a>
       </header>
 
       <div className="flex items-center gap-2 mb-4">
-        <TabBtn active={activeTab === "zones"} onClick={() => setActiveTab("zones")}>
+        <TabBtn
+          active={activeTab === "zones"}
+          onClick={() => setActiveTab("zones")}
+        >
           野生特區
         </TabBtn>
-        <TabBtn active={activeTab === "evo"} onClick={() => setActiveTab("evo")}>
+        <TabBtn
+          active={activeTab === "evo"}
+          onClick={() => setActiveTab("evo")}
+        >
           進化圖鑑（依隊伍）
         </TabBtn>
       </div>
@@ -239,7 +358,9 @@ export default function App() {
             </label>
             <select
               value={caughtFilter}
-              onChange={(e) => setCaughtFilter(e.target.value as any)}
+              onChange={(e) =>
+                setCaughtFilter(e.target.value as "all" | "caught" | "uncaught")
+              }
               className="rounded-lg border border-zinc-200 px-2 py-2 text-xs"
             >
               <option value="all">全部</option>
@@ -255,12 +376,12 @@ export default function App() {
           onRemove={removeFromTeam}
           onClear={clearTeam}
           alphaMap={alphaMap}
+          selectedIndex={selectedTeamIndex}
           onSelect={(i, name) => {
             setSelectedTeamIndex(i);
             setEvoSearch(name);
-            setActiveTab("evo"); // 自動切到進化圖鑑頁籤
+            setActiveTab("evo");
           }}
-          selectedIndex={selectedTeamIndex}
         />
       </div>
 
@@ -283,29 +404,15 @@ export default function App() {
           team={team}
           flatMons={flatMons}
           selectedTeamIndex={selectedTeamIndex}
-          setSelectedTeamIndex={setSelectedTeamIndex}
-          evoSearch={evoSearch}
-          setEvoSearch={setEvoSearch}
-          onEvolve={(index, fromName, toName) => {
-            const fromMon = team[index];
-            const toMon = getMonByName(toName, flatMons);
-            if (!toMon) return;
-        
-            const newTeam = [...team];
-            newTeam[index] = {
-              ...fromMon,
-              name: toMon.displayName,
-              dex: parseInt(toMon.image.match(/\/(\d+)\.png$/)?.[1] ?? "0", 10),
-              moves: (toMon.types || []).map((t) => TYPE_ZH_TO_EN[t] || "normal"),
-            };
-            setTeam(newTeam);
-          }}
+          search={evoSearch}
+          setSearch={setEvoSearch}
+          onEvolve={handleEvolve}
         />
-
       )}
 
       <footer className="mt-8 text-[11px] text-zinc-500">
-        資料暫存於本機（localStorage）。如需重置，請清除瀏覽器儲存或於程式中更換 LS_KEYS 前綴。
+        資料暫存於本機（localStorage）。如需重置，請清除瀏覽器儲存或於程式中更換
+        LS_KEYS 前綴。
       </footer>
     </div>
   );
@@ -324,7 +431,16 @@ const ZonesView: React.FC<{
   onAddTeam: (id: MonId) => void;
   inTeam: (id: MonId) => boolean;
   caughtFilter: "all" | "caught" | "uncaught";
-}> = ({ zones, alphaMap, onlyAlpha, q, onToggleAlpha, onAddTeam, inTeam, caughtFilter }) => {
+}> = ({
+  zones,
+  alphaMap,
+  onlyAlpha,
+  q,
+  onToggleAlpha,
+  onAddTeam,
+  inTeam,
+  caughtFilter,
+}) => {
   const [open, setOpen] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
@@ -333,7 +449,8 @@ const ZonesView: React.FC<{
     setOpen(init);
   }, [zones]);
 
-  const matchQ = (name: string) => name.toLowerCase().includes(q.trim().toLowerCase());
+  const matchQ = (name: string) =>
+    name.toLowerCase().includes(q.trim().toLowerCase());
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3">
@@ -355,23 +472,34 @@ const ZonesView: React.FC<{
         });
         if (!filtered.length && q) return null;
         return (
-          <div key={z.zoneNo} className="rounded-2xl border border-zinc-200 overflow-hidden">
+          <div
+            key={z.zoneNo}
+            className="rounded-2xl border border-zinc-200 overflow-hidden"
+          >
             <div className="w-full flex items-center justify-between px-4 py-3 bg-zinc-50">
               {/* 左邊：點這裡收起 / 展開 */}
               <button
                 className="flex-1 flex items-center justify-between hover:bg-zinc-100 rounded-xl text-left pr-3"
-                onClick={() => setOpen((o) => ({ ...o, [z.zoneNo]: !o[z.zoneNo] }))}
+                onClick={() =>
+                  setOpen((o) => ({ ...o, [z.zoneNo]: !o[z.zoneNo] }))
+                }
               >
                 <div className="flex items-center gap-3">
                   <div className="h-8 w-8 rounded-xl bg-zinc-900 text-white grid place-items-center text-sm">
                     {z.zoneNo}
                   </div>
                   <div className="text-left">
-                    <div className="text-sm font-semibold">野生特區 {z.zoneNo}</div>
-                    <div className="text-[11px] text-zinc-500">{z.mons.length} 種</div>
+                    <div className="text-sm font-semibold">
+                      野生特區 {z.zoneNo}
+                    </div>
+                    <div className="text-[11px] text-zinc-500">
+                      {z.mons.length} 種
+                    </div>
                   </div>
                 </div>
-                <div className="text-xs text-zinc-600">{open[z.zoneNo] ? "收起" : "展開"}</div>
+                <div className="text-xs text-zinc-600">
+                  {open[z.zoneNo] ? "收起" : "展開"}
+                </div>
               </button>
 
               {/* 右邊：全選加入隊伍 */}
@@ -407,7 +535,9 @@ const ZonesView: React.FC<{
                         <div className="text-sm font-medium flex items-center gap-2">
                           <span>{m.displayName}</span>
                           {m.enName && (
-                            <span className="text-[10px] text-zinc-500">{m.enName}</span>
+                            <span className="text-[10px] text-zinc-500">
+                              {m.enName}
+                            </span>
                           )}
                           {(alphaMap[m.id] || m.alpha) && <Tag>頭目</Tag>}
                         </div>
@@ -479,25 +609,34 @@ const EvolutionView: React.FC<{
   team: MyTeamEntry[];
   flatMons: ZoneMon[];
   selectedTeamIndex: number | null;
-  setSelectedTeamIndex: (i: number | null) => void;
-  evoSearch: string;
-  setEvoSearch: (s: string) => void;
+  search: string;
+  setSearch: (v: string) => void;
   onEvolve: (index: number, from: string, to: string) => void;
-}> = ({ evolutions, team, flatMons, selectedTeamIndex, evoSearch, setEvoSearch, onEvolve }) => {
-  const [q, setQ] = useState("");
+}> = ({
+  evolutions,
+  team,
+  flatMons,
+  selectedTeamIndex,
+  search,
+  setSearch,
+  onEvolve,
+}) => {
   const [category, setCategory] = useState<EvoCategory>("全部");
-
   const cats: EvoCategory[] = ["全部", "等級", "道具", "好感", "通訊進化"];
 
   const teamNames = useMemo(() => new Set(team.map((t) => t.name)), [team]);
 
   const groups = useMemo(() => {
-    const keyword = q.trim().toLowerCase();
+    const keyword = search.trim().toLowerCase();
     const map = new Map<
       string,
       {
         fromMon: ZoneMon | null;
-        records: { record: EvolutionRecord; toMon: ZoneMon | null; cat: EvoCategory }[];
+        records: {
+          record: EvolutionRecord;
+          toMon: ZoneMon | null;
+          cat: EvoCategory;
+        }[];
       }
     >();
 
@@ -512,8 +651,7 @@ const EvolutionView: React.FC<{
       if (keyword && !textToSearch.includes(keyword)) return;
 
       const current = map.get(r.from);
-      const fromMon =
-        current?.fromMon ?? getMonByName(r.from, flatMons);
+      const fromMon = current?.fromMon ?? getMonByName(r.from, flatMons);
       const toMon = getMonByName(r.to, flatMons);
 
       const next = current ?? { fromMon, records: [] };
@@ -526,7 +664,7 @@ const EvolutionView: React.FC<{
       fromMon: data.fromMon,
       records: data.records,
     }));
-  }, [evolutions, teamNames, q, category, flatMons]);
+  }, [evolutions, teamNames, search, category, flatMons]);
 
   const totalEvolvable = groups.length;
 
@@ -545,8 +683,8 @@ const EvolutionView: React.FC<{
         {/* 搜尋＋篩選 */}
         <div className="mt-3 flex flex-col gap-2 sm:flex-row sm:items-center">
           <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
             placeholder="搜尋（例：伊布／菊草葉／水之石／等級）"
             className="w-full rounded-xl border border-zinc-200 px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-zinc-900"
           />
@@ -581,7 +719,9 @@ const EvolutionView: React.FC<{
               key={fromName}
               className="rounded-2xl border border-zinc-200 bg-white p-4 shadow-sm flex flex-col gap-4"
             >
-              <h3 className="text-sm font-semibold text-zinc-900">{fromName} 的下一步進化</h3>
+              <h3 className="text-sm font-semibold text-zinc-900">
+                {fromName} 的下一步進化
+              </h3>
               <div className="flex flex-col gap-3">
                 {records.map(({ record, toMon, cat }, idx) => (
                   <div
@@ -621,7 +761,9 @@ const EvolutionView: React.FC<{
                       <span className="mt-1 inline-flex items-center rounded-full border border-zinc-300 px-2 py-[1px] text-[10px] text-zinc-700">
                         {cat}
                       </span>
-                      <span className="mt-1 text-[11px] text-zinc-500">{record.condition}</span>
+                      <span className="mt-1 text-[11px] text-zinc-500">
+                        {record.condition}
+                      </span>
                     </div>
 
                     {/* 右：進化後 */}
@@ -643,21 +785,24 @@ const EvolutionView: React.FC<{
                               </Tag>
                             ))}
                           </div>
-                          
-                          {/* 在這裡加進化按鈕 */}
+
+                          {/* 進化按鈕 */}
                           <button
                             onClick={() => {
                               if (selectedTeamIndex == null) {
-                                alert("請先選擇上方隊伍成員");
+                                alert("請先從上方「我的隊伍」選擇一隻寶可夢");
                                 return;
                               }
-                              onEvolve(selectedTeamIndex, fromName, toMon?.displayName || "");
+                              onEvolve(
+                                selectedTeamIndex,
+                                fromName,
+                                toMon.displayName
+                              );
                             }}
                             className="mt-2 text-xs px-3 py-1 rounded-full border border-emerald-300 bg-emerald-50 text-emerald-700 hover:bg-emerald-100"
                           >
                             進化
                           </button>
-                          
                         </>
                       ) : (
                         <div className="h-20 w-20 rounded-xl bg-zinc-100 grid place-items-center text-[11px] text-zinc-500 border border-dashed border-zinc-200">
@@ -668,7 +813,6 @@ const EvolutionView: React.FC<{
                   </div>
                 ))}
               </div>
-
             </div>
           ))}
         </div>
@@ -687,7 +831,7 @@ const TeamBar: React.FC<{
   onClear: () => void;
   alphaMap: AlphaMap;
   onSelect: (index: number, name: string) => void;
-  selectedIndex: number | null;                   
+  selectedIndex: number | null;
 }> = ({ team, onRemove, onClear, alphaMap, onSelect, selectedIndex }) => {
   const allMons = useMemo(() => {
     const list: ZoneMon[] = [];
@@ -723,7 +867,9 @@ const TeamBar: React.FC<{
                 onClick={() => onSelect(i, member.name)}
                 className={
                   "relative flex items-center rounded-xl p-2 bg-white cursor-pointer transition " +
-                  (selectedIndex === i ? "ring-2 ring-amber-400 border border-amber-300" : "border border-zinc-200")
+                  (selectedIndex === i
+                    ? "ring-2 ring-amber-400 border border-amber-300"
+                    : "border border-zinc-200")
                 }
               >
                 <div className="flex items-center gap-3">
@@ -752,7 +898,10 @@ const TeamBar: React.FC<{
 
                 {/* 右上角刪除按鈕 */}
                 <button
-                  onClick={() => onRemove(member.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onRemove(member.id);
+                  }}
                   className="absolute top-1 right-1 h-6 w-6 rounded-full border border-zinc-200 text-zinc-500 hover:bg-zinc-50"
                   aria-label="移除"
                 >
@@ -765,8 +914,4 @@ const TeamBar: React.FC<{
       )}
     </div>
   );
-
 };
-
-
-

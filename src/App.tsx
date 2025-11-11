@@ -14,7 +14,7 @@ const TabBtn: React.FC<{
 }> = ({ active, onClick, children }) => (
   <button
     onClick={onClick}
-    className={`px-4 py-2 rounded-xl text-sm font-medium transition border ${
+    className={`w-full py-2 rounded-xl text-sm font-medium transition border ${
       active
         ? "bg-zinc-900 text-white border-zinc-900"
         : "bg-white text-zinc-700 border-zinc-200 hover:bg-zinc-50"
@@ -23,6 +23,7 @@ const TabBtn: React.FC<{
     {children}
   </button>
 );
+
 
 
 
@@ -442,7 +443,7 @@ export default function App(){
       <p className="text-sm text-white mb-3">【對手查詢】：輸入對手名稱或手動選屬性，立即看弱點。 <br/>【我的隊伍】：維護你的隊伍招式屬性，幫你推薦上場人選。</p>
 
       {/* 頁首分頁：對手查詢 / 我的隊伍 */}
-      <div className="flex items-center gap-2 mb-4">
+      <div className="grid grid-cols-2 gap-2 mb-4 w-full">
         <TabBtn active={mode === "opponent"} onClick={() => setMode("opponent")}>
           對手查詢
         </TabBtn>

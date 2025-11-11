@@ -86,7 +86,7 @@ export const WILD_ZONES: WildZone[] = [
       { id: "magikarp", displayName: "鯉魚王", enName: "Magikarp", types: ["水"], image: spriteUrlByDex(129) },
       { id: "houndour", displayName: "戴魯比", enName: "Houndour", types: ["惡", "火"], image: spriteUrlByDex(228) },
       { id: "swablu", displayName: "青綿鳥", enName: "Swablu", types: ["一般", "飛行"], image: spriteUrlByDex(333) },
-      { id: "flaaffy", displayName: "茸茸羊", enName: "Wooloo", types: ["一般"], image: spriteUrlByDex(180) },
+      { id: "flaaffy", displayName: "茸茸羊", enName: "Wooloo", types: ["電"], image: spriteUrlByDex(180) },
     ],
   },
   {
@@ -200,7 +200,7 @@ export const WILD_ZONES: WildZone[] = [
     zoneNo: 16,
     mons: [
       { id: "falinks", displayName: "列陣兵", enName: "Falinks", types: ["格鬥"], image: spriteUrlByDex(870) },
-      { id: "flaaffy", displayName: "茸茸羊", enName: "Wooloo", types: ["一般"], image: spriteUrlByDex(180) },
+      { id: "flaaffy", displayName: "茸茸羊", enName: "Wooloo", types: ["電"], image: spriteUrlByDex(180) },
       { id: "starmie", displayName: "寶石海星", enName: "Starmie", types: ["水", "超能力"], image: spriteUrlByDex(121) },
       { id: "barbaracle", displayName: "龜足巨鎧", enName: "Barbaracle", types: ["岩石", "水"], image: spriteUrlByDex(689) },
       { id: "medicham", displayName: "恰雷姆", enName: "Medicham", types: ["格鬥", "超能力"], image: spriteUrlByDex(308) },

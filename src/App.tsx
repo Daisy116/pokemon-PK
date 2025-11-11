@@ -3,7 +3,6 @@ import { Input } from "./components/ui/input";
 import { Button } from "./components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "./components/ui/card";
 import { Badge } from "./components/ui/badge";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/tabs";
 
 const pokedexURL = `${import.meta.env.BASE_URL}pokedex/`;
 
@@ -443,31 +442,29 @@ export default function App(){
       <p className="text-sm text-white mb-3">【對手查詢】：輸入對手名稱或手動選屬性，立即看弱點。 <br/>【我的隊伍】：維護你的隊伍招式屬性，幫你推薦上場人選。</p>
 
       {/* 頁首分頁：對手查詢 / 我的隊伍 */}
-      {/* <Tabs defaultValue="enemy" className="w-full">
-        <TabsList className="w-full grid grid-cols-2 mb-3 rounded-xl bg-zinc-100 p-1">
-          <TabsTrigger value="enemy" className="tabs-trigger">對手查詢</TabsTrigger>
-          <TabsTrigger value="team" className="tabs-trigger">我的隊伍</TabsTrigger>
-        </TabsList> */}
-         <div className="flex items-center gap-2 mb-4">
-           <TabBtn active={mode === "opponent"} onClick={() => setMode("opponent")}>
-             對手查詢
-           </TabBtn>
-           <TabBtn active={mode === "myTeam"} onClick={() => setMode("myTeam")}>
-             我的隊伍
-           </TabBtn>
-         </div>
+      <div className="flex items-center gap-2 mb-4">
+        <TabBtn active={mode === "opponent"} onClick={() => setMode("opponent")}>
+          對手查詢
+        </TabBtn>
+        <TabBtn active={mode === "myTeam"} onClick={() => setMode("myTeam")}>
+          我的隊伍
+        </TabBtn>
+      </div>
 
-        {/* 對手查詢分頁 */}
-        <TabsContent value="enemy">
+      {/* 對手查詢分頁內容 */}
+      {mode === "opponent" && (
+        <>
           <Card className="mb-4 rounded-2xl">
-            <CardHeader className="pb-2"><CardTitle className="text-base">1) 以名稱查屬性</CardTitle></CardHeader>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">1) 以名稱查屬性</CardTitle>
+            </CardHeader>
             <CardContent>
               <div className="flex gap-2 items-center mb-2">
                 <Input
                   className="h-9 text-sm"
                   placeholder="輸入中文或英文名稱（例：皮卡丘 / pikachu）"
                   value={enemyName}
-                  onChange={(e)=>setEnemyName(e.target.value)}
+                  onChange={(e) => setEnemyName(e.target.value)}
                 />
                 <Button
                   className="rounded-full min-w-[80px] bg-zinc-900 text-white border border-zinc-900 h-9 px-4 text-sm font-medium hover:bg-zinc-800 active:scale-[.98] transition disabled:opacity-50 disabled:pointer-events-none"
@@ -477,7 +474,14 @@ export default function App(){
                   {loading ? "查詢中…" : "查屬性"}
                 </Button>
               </div>
-<div className="text-sm text-zinc-600">目前：{(enemyTypes??manual).length? (enemyTypes??manual).map(t=> <TypeBadge key={t} t={t} />): '未選擇'}</div>
+
+              <div className="text-sm text-zinc-600">
+                目前：
+                {(enemyTypes ?? manual).length
+                  ? (enemyTypes ?? manual).map((t) => <TypeBadge key={t} t={t} />)
+                  : "未選擇"}
+              </div>
+
               {enemyId ? (
                 <div className="mt-3 w-full flex justify-center">
                   <div className="rounded-xl border p-2 bg-zinc-50">
@@ -489,20 +493,42 @@ export default function App(){
           </Card>
 
           <Card className="mb-4 rounded-2xl">
-            <CardHeader className="pb-2"><CardTitle className="text-base">屬性相剋結果</CardTitle></CardHeader>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">屬性相剋結果</CardTitle>
+            </CardHeader>
             <CardContent>
               {mult ? (
                 <>
                   <div className="mb-3">
-                    <div className="text-sm font-medium mb-1">弱點（請用下列招式屬性攻擊）：</div>
-                    {weakList.length ? weakList.map(s=> <TypeBadge key={s.type} t={s.type} extra={`×${s.val}`} />) : <span className="text-sm text-zinc-500">無明顯弱點</span>}
+                    <div className="text-sm font-medium mb-1">
+                      弱點（請用下列招式屬性攻擊）：
+                    </div>
+                    {weakList.length ? (
+                      weakList.map((s) => (
+                        <TypeBadge key={s.type} t={s.type} extra={`×${s.val}`} />
+                      ))
+                    ) : (
+                      <span className="text-sm text-zinc-500">無明顯弱點</span>
+                    )}
                   </div>
                   <div>
-                    <div className="text-sm font-medium mb-1">抗性（盡量避免用這些屬性攻擊）：</div>
-                    {resistList.length ? resistList.map(s=> <TypeBadge key={s.type} t={s.type} extra={`0.5×`} />) : <span className="text-sm text-zinc-500">無顯著抗性</span>}
+                    <div className="text-sm font-medium mb-1">
+                      抗性（盡量避免用這些屬性攻擊）：
+                    </div>
+                    {resistList.length ? (
+                      resistList.map((s) => (
+                        <TypeBadge key={s.type} t={s.type} extra="0.5×" />
+                      ))
+                    ) : (
+                      <span className="text-sm text-zinc-500">無顯著抗性</span>
+                    )}
                   </div>
                 </>
-              ): <div className="text-sm text-zinc-500">請先輸入對手名稱或手動選屬性。</div>}
+              ) : (
+                <div className="text-sm text-zinc-500">
+                  請先輸入對手名稱或手動選屬性。
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -512,18 +538,32 @@ export default function App(){
             </CardHeader>
             <CardContent>
               {!mult ? (
-                <div className="text-sm text-zinc-500">請先在上方輸入對手或選擇屬性，才能推薦上場。</div>
+                <div className="text-sm text-zinc-500">
+                  請先在上方輸入對手或選擇屬性，才能推薦上場。
+                </div>
               ) : teamSuggest.length ? (
                 <>
-                  <div className="text-xs text-zinc-500 mb-2">敵方弱點：{weakList.map(w=> <TypeBadge key={w.type} t={w.type} extra={`×${w.val}`} />)}</div>
+                  <div className="text-xs text-zinc-500 mb-2">
+                    敵方弱點：
+                    {weakList.map((w) => (
+                      <TypeBadge key={w.type} t={w.type} extra={`×${w.val}`} />
+                    ))}
+                  </div>
                   <ul className="space-y-2">
-                    {teamSuggest.map(m=> (
-                      <li key={m.id} className="flex items-center justify-between bg-white border rounded-xl p-2 shadow-sm">
+                    {teamSuggest.map((m) => (
+                      <li
+                        key={m.id}
+                        className="flex items-center justify-between bg-white border rounded-xl p-2 shadow-sm"
+                      >
                         <div className="flex items-center gap-3">
                           <TeamAvatar name={m.name} dex={m.dex} size={64} />
                           <div>
                             <div className="text-sm font-medium">{m.name}</div>
-                            <div className="mt-0.5">{m.moves.map(t=> <TypeBadge key={m.id+':'+t} t={t} />)}</div>
+                            <div className="mt-0.5">
+                              {m.moves.map((t) => (
+                                <TypeBadge key={m.id + ":" + t} t={t} />
+                              ))}
+                            </div>
                           </div>
                         </div>
                       </li>
@@ -531,87 +571,105 @@ export default function App(){
                   </ul>
                 </>
               ) : (
-                <div className="text-sm text-zinc-500">你的隊伍中暫無對應敵方弱點的成員。</div>
+                <div className="text-sm text-zinc-500">
+                  你的隊伍中暫無對應敵方弱點的成員。
+                </div>
               )}
             </CardContent>
           </Card>
-        </TabsContent>
+        </>
+      )}
 
-        {/* 我的隊伍分頁 */}
-        <TabsContent value="team">
+      {/* 我的隊伍分頁內容 */}
+      {mode === "myTeam" && (
+        <>
           <Card className="mb-4 rounded-2xl">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base">新增我的寶可夢隊員</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="text-xs text-zinc-500 mb-2">
-                  提示：輸入寶可夢名稱後點右側按鈕，系統會自動抓取屬性並加入隊伍。
-                </div>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">新增我的寶可夢隊員</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="text-xs text-zinc-500 mb-2">
+                提示：輸入寶可夢名稱後點右側按鈕，系統會自動抓取屬性並加入隊伍。
+              </div>
 
-                {/* 名稱輸入 + 右側合併按鈕 */}
-                <div className="flex gap-2 items-center mb-2">
-                  <Input
-                    className="h-9 text-sm"
-                    placeholder="寶可夢名稱"
-                    value={draftName}
-                    onChange={(e) => setDraftName(e.target.value)}
-                  />
-                  <Button
-                    className="rounded-full min-w-[70px] bg-zinc-900 text-white border border-zinc-900 h-9 px-3 text-sm font-medium hover:bg-zinc-800 active:scale-[.98] transition disabled:opacity-50 disabled:pointer-events-none"
-                    onClick={addMateAutoFromName}
-                    disabled={loading || !draftName.trim()}
+              <div className="flex gap-2 items-center mb-2">
+                <Input
+                  className="h-9 text-sm"
+                  placeholder="寶可夢名稱"
+                  value={draftName}
+                  onChange={(e) => setDraftName(e.target.value)}
+                />
+                <Button
+                  className="rounded-full min-w-[70px] bg-zinc-900 text-white border border-zinc-900 h-9 px-3 text-sm font-medium hover:bg-zinc-800 active:scale-[.98] transition disabled:opacity-50 disabled:pointer-events-none"
+                  onClick={addMateAutoFromName}
+                  disabled={loading || !draftName.trim()}
+                >
+                  加入
+                </Button>
+              </div>
+
+              <div className="flex flex-wrap gap-2 mb-3">
+                {TYPES.map((t) => (
+                  <button
+                    key={t}
+                    onClick={() =>
+                      setDraftMoves((prev) =>
+                        prev.includes(t)
+                          ? prev.filter((x) => x !== t)
+                          : [...prev, t]
+                      )
+                    }
+                    className={`px-3 py-1 rounded-full text-sm shadow border ${
+                      draftMoves.includes(t) ? "ring-2 ring-black" : ""
+                    } ${TYPE_COLORS[t] || "bg-gray-200 text-black"}`}
                   >
-                    加入
-                  </Button>
-                </div>
-
-                {/* 型色按鈕區（可選） */}
-                <div className="flex flex-wrap gap-2 mb-3">
-                  {TYPES.map((t) => (
-                    <button
-                      key={t}
-                      onClick={() =>
-                        setDraftMoves((prev) =>
-                          prev.includes(t) ? prev.filter((x) => x !== t) : [...prev, t]
-                        )
-                      }
-                      className={`px-3 py-1 rounded-full text-sm shadow border ${
-                        draftMoves.includes(t) ? "ring-2 ring-black" : ""
-                      } ${TYPE_COLORS[t] || "bg-gray-200 text-black"}`}
-                    >
-                      {TYPE_ZH[t]}
-                    </button>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
+                    {TYPE_ZH[t]}
+                  </button>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
 
           <Card className="rounded-2xl">
-            <CardHeader className="pb-2"><CardTitle className="text-base">我的隊伍</CardTitle></CardHeader>
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">我的隊伍</CardTitle>
+            </CardHeader>
             <CardContent>
-              {team.length? (
+              {team.length ? (
                 <ul className="space-y-2">
-                  {team.map(m=> (
-                    <li key={m.id} className="flex items-center justify-between bg-zinc-50 border rounded-xl p-2">
+                  {team.map((m) => (
+                    <li
+                      key={m.id}
+                      className="flex items-center justify-between bg-zinc-50 border rounded-xl p-2"
+                    >
                       <div className="flex items-center gap-3">
                         <TeamAvatar name={m.name} dex={m.dex} size={64} />
                         <div>
                           <div className="text-sm font-medium">{m.name}</div>
                           <div>
-                            {m.moves.map(t=> <TypeBadge key={m.id+':'+t} t={t} />)}
+                            {m.moves.map((t) => (
+                              <TypeBadge key={m.id + ":" + t} t={t} />
+                            ))}
                           </div>
                         </div>
                       </div>
-                      <Button className="h-9 px-3" variant="destructive" onClick={()=>removeMate(m.id)}>刪除</Button>
+                      <Button
+                        className="h-9 px-3"
+                        variant="destructive"
+                        onClick={() => removeMate(m.id)}
+                      >
+                        刪除
+                      </Button>
                     </li>
                   ))}
                 </ul>
-              ): <div className="text-sm text-zinc-500">尚無成員，請先新增。</div>}
+              ) : (
+                <div className="text-sm text-zinc-500">尚無成員，請先新增。</div>
+              )}
             </CardContent>
           </Card>
-        </TabsContent>
-      </Tabs>
+        </>
+      )}
 
       <footer className="fixed bottom-0 left-0 w-full bg-black/30 text-center py-2 text-[10px] text-white">資料來源：PokeAPI。第一次用中文名稱查詢時會建立索引並快取到本機。</footer>
       </div>

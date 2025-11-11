@@ -688,7 +688,7 @@ const TeamBar: React.FC<{
   alphaMap: AlphaMap;
   onSelect: (index: number, name: string) => void;
   selectedIndex: number | null;                   
-}> = ({ team, onRemove, onClear, alphaMapp, onSelect, selectedIndex }) => {
+}> = ({ team, onRemove, onClear, alphaMap, onSelect, selectedIndex }) => {
   const allMons = useMemo(() => {
     const list: ZoneMon[] = [];
     WILD_ZONES.forEach((z) => z.mons.forEach((m) => list.push(m)));
@@ -767,5 +767,6 @@ const TeamBar: React.FC<{
   );
 
 };
+
 
 

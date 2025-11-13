@@ -306,20 +306,23 @@ export default function App() {
   };
 
 
-  return (
-      <div className="theme-space bg-cover bg-center">
-        <div className="text-zinc-900 min-h-screen py-4 px-8 max-w-md mx-auto">
-          <h1 className="text-xl text-white font-bold">Pokémon Legends ZA — 野生特區小程序</h1>
-           <div className="mt-2 mb-3 flex items-center gap-2">
-              <a
-                href={homeURL}
-                className="inline-flex items-center gap-1 rounded-full bg-white/80 hover:bg-white text-zinc-900 border border-zinc-300 px-3 py-1 text-xs font-medium transition"
-              >
-                返回首頁 →
-              </a>
-              <p className="text-sm text-zinc-600">
-                快速勾選已捕捉、加入隊伍與進化條件。
-              </p>
+return (
+  <div className="min-h-screen theme-space bg-cover bg-center">
+    <div className="p-3 sm:p-6 max-w-6xl mx-auto">
+      <header className="mb-4">
+        <h1 className="text-xl font-bold text-zinc-900">
+          Pokémon Legends ZA — 野生特區小程序
+        </h1>
+        <p className="text-sm text-zinc-600">
+          快速勾選已捕捉、加入隊伍與進化條件。
+        </p>
+        <a
+          href={homeURL}
+          className="inline-flex items-center gap-1 rounded-full bg-white/80 hover:bg-white text-zinc-900 border border-zinc-300 px-3 py-1 text-xs font-medium transition"
+        >
+          返回首頁 →
+        </a>
+      </header>
 
       <div className="flex items-center gap-2 mb-4">
         <TabBtn
@@ -415,7 +418,6 @@ export default function App() {
         LS_KEYS 前綴。
       </footer>
 
-        </div>
       </div>
     </div>
   );

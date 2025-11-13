@@ -883,7 +883,7 @@ const TeamBar: React.FC<{
                     className="h-12 w-12 rounded-lg object-contain bg-white"
                   />
                   <div>
-                    <div className="text-sm font-medium">{member.name}</div>
+                    <div className="text-sm font-medium text-zinc-900">{member.name}</div>
                     <div className="flex flex-wrap gap-1 mt-1">
                       {(mon?.types || []).map((t) => (
                         <Tag key={t} typeName={t}>
@@ -915,5 +915,6 @@ const TeamBar: React.FC<{
   );
 
 };
+
 
 

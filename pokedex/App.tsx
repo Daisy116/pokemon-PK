@@ -307,7 +307,7 @@ export default function App() {
 
 
 return (
-  <div className="min-h-screen theme-space bg-cover bg-center">
+  <div className="min-h-screen theme-space bg-cover bg-center text-white">
     <div className="p-3 sm:p-6 max-w-6xl mx-auto">
       <header className="mb-4">
         <h1 className="text-xl font-bold text-zinc-900">
@@ -915,3 +915,4 @@ const TeamBar: React.FC<{
   );
 
 };
+

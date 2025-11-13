@@ -277,19 +277,10 @@ export default function App() {
     setTeam((prev) => {
       if (index < 0 || index >= prev.length) return prev;
 
+      const current = prev[index];
+      // 雖然理論上 fromName 應該一致，但就算不一致也直接覆蓋沒關係
       const toMon = getMonByName(toName, flatMons);
       if (!toMon) return prev;
-
-      // 檢查是否已有同名寶可夢（排除自己這一格）
-      const hasDuplicate = prev.some(
-        (t, idx) => idx !== index && t.name === toMon.displayName
-      );
-      if (hasDuplicate) {
-        alert(`隊伍中已經有一隻「${toMon.displayName}」了喔！`);
-        return prev;
-      }
-
-      const current = prev[index];
 
       let dex: number | undefined;
       if (toMon.image) {

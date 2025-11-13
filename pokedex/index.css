@@ -21,9 +21,10 @@ button {
 
 /* -------- 加上星空背景 -------- */
 .theme-space {
-  background-image: url("/pokemon/space-bg.png");
+  background-image: url("/pokemon-PK/pokemon/space-bg.png");
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-attachment: fixed; /* 視差感 */
+
 }

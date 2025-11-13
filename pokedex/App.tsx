@@ -310,10 +310,10 @@ return (
   <div className="min-h-screen theme-space bg-cover bg-center text-white">
     <div className="p-3 sm:p-6 max-w-6xl mx-auto">
       <header className="mb-4">
-        <h1 className="text-xl font-bold text-zinc-900">
+        <h1 className="text-xl font-bold">
           Pokémon Legends ZA — 野生特區小程序
         </h1>
-        <p className="text-sm text-zinc-600">
+        <p className="text-sm text-zinc-300">
           快速勾選已捕捉、加入隊伍與進化條件。
         </p>
         <a
@@ -494,7 +494,7 @@ const ZonesView: React.FC<{
                     {z.zoneNo}
                   </div>
                   <div className="text-left">
-                    <div className="text-sm font-semibold">
+                    <div className="text-sm font-semibold text-zinc-900">
                       野生特區 {z.zoneNo}
                     </div>
                     <div className="text-[11px] text-zinc-500">
@@ -540,7 +540,7 @@ const ZonesView: React.FC<{
                         <div className="text-sm font-medium flex items-center gap-2">
                           <span>{m.displayName}</span>
                           {m.enName && (
-                            <span className="text-[10px] text-zinc-500">
+                            <span className="text-[10px]">
                               {m.enName}
                             </span>
                           )}
@@ -915,4 +915,5 @@ const TeamBar: React.FC<{
   );
 
 };
+
 

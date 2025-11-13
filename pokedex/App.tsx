@@ -382,6 +382,7 @@ export default function App() {
             setEvoSearch(name);
             setActiveTab("evo");
           }}
+          flatMons={flatMons}
         />
       </div>
 
@@ -832,13 +833,8 @@ const TeamBar: React.FC<{
   alphaMap: AlphaMap;
   onSelect: (index: number, name: string) => void;
   selectedIndex: number | null;
-}> = ({ team, onRemove, onClear, alphaMap, onSelect, selectedIndex }) => {
-  const allMons = useMemo(() => {
-    const list: ZoneMon[] = [];
-    WILD_ZONES.forEach((z) => z.mons.forEach((m) => list.push(m)));
-    return list;
-  }, []);
-
+  flatMons: ZoneMon[];
+}> = ({ team, onRemove, onClear, alphaMap, onSelect, selectedIndex, flatMons }) => {
   return (
     <div className="rounded-2xl border border-zinc-200 p-3">
       <div className="flex items-center justify-between mb-2">
@@ -858,8 +854,7 @@ const TeamBar: React.FC<{
       ) : (
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-2">
           {team.map((member, i) => {
-            const mon =
-              allMons.find((m) => m.displayName === member.name) || null;
+            const mon = getMonByName(member.name, flatMons);
 
             return (
               <div
@@ -914,4 +909,5 @@ const TeamBar: React.FC<{
       )}
     </div>
   );
+
 };

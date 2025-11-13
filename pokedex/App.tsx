@@ -307,21 +307,19 @@ export default function App() {
 
 
   return (
-    <div className="min-h-screen bg-white text-zinc-900 p-3 sm:p-6">
-      <header className="mb-4">
-        <h1 className="text-xl font-bold">
-          Pokémon Legends ZA — 野生特區小程序
-        </h1>
-        <p className="text-sm text-zinc-600">
-          快速勾選已捕捉、加入隊伍與進化條件。
-        </p>
-        <a
-          href={homeURL}
-          className="inline-flex items-center gap-1 rounded-full bg-white/80 hover:bg-white text-zinc-900 border border-zinc-300 px-3 py-1 text-xs font-medium transition"
-        >
-          返回首頁 →
-        </a>
-      </header>
+      <div className="theme-space bg-cover bg-center">
+        <div className="text-zinc-900 min-h-screen py-4 px-8 max-w-md mx-auto">
+          <h1 className="text-xl text-white font-bold">Pokémon Legends ZA — 野生特區小程序</h1>
+           <div className="mt-2 mb-3 flex items-center gap-2">
+              <a
+                href={homeURL}
+                className="inline-flex items-center gap-1 rounded-full bg-white/80 hover:bg-white text-zinc-900 border border-zinc-300 px-3 py-1 text-xs font-medium transition"
+              >
+                返回首頁 →
+              </a>
+              <p className="text-sm text-zinc-600">
+                快速勾選已捕捉、加入隊伍與進化條件。
+              </p>
 
       <div className="flex items-center gap-2 mb-4">
         <TabBtn
@@ -416,6 +414,9 @@ export default function App() {
         資料暫存於本機（localStorage）。如需重置，請清除瀏覽器儲存或於程式中更換
         LS_KEYS 前綴。
       </footer>
+
+        </div>
+      </div>
     </div>
   );
 }

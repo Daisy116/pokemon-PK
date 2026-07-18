@@ -1,14 +1,99 @@
-# pokemon-PK 模板（Vite + React + TS + Tailwind）
+# Pokémon PK
 
-## 使用
+為《Pokémon Legends: Z-A》玩家設計的戰鬥輔助工具。  
+輸入對手名稱後，可以快速查詢屬性弱點，並根據自己的寶可夢隊伍推薦適合上場的成員；另外整合野生特區及進化條件資料，方便遊戲過程中快速查找。
+
+## Demo
+
+- [線上體驗：屬性相剋與隊伍推薦](https://daisy116.github.io/pokemon-PK/)
+- [野生特區與進化圖鑑](https://daisy116.github.io/pokemon-PK/pokedex/)
+- [GitHub Repository](https://github.com/Daisy116/pokemon-PK)
+- 操作影片：待補
+
+## 專案緣起
+
+遊玩《Pokémon Legends: Z-A》時，我經常遇到不確定寶可夢屬性相剋、以及不知道該派哪位隊伍成員上場的情況。
+雖然網路上可以查到相關資料，但遊戲過程中需要反覆切換頁面，因此我將屬性查詢、隊伍推薦、野生特區和進化條件整合成一個方便自己使用的工具。
+
+## 核心功能
+
+### 1. 對手屬性與弱點查詢
+
+- 支援輸入中文或英文寶可夢名稱
+- 自動取得對手的屬性資料
+- 計算弱點、抗性及攻擊倍率
+- 查詢失敗時，也可以手動指定對手屬性
+
+### 2. 我的隊伍管理與上場推薦
+
+- 輸入寶可夢名稱，自動取得屬性並加入隊伍
+- 根據對手弱點，推薦適合上場的隊伍成員
+- 隊伍資料會暫存保留在瀏覽器中，重新開啟後仍會保留
+
+### 3. Pokémon Legends: Z-A 野生特區圖鑑
+
+- 收錄野生特區 1～20 的寶可夢資料
+- 支援中文及英文名稱搜尋
+- 可依一般寶可夢、頭目寶可夢進行篩選
+- 可直接將野生特區中的寶可夢加入隊伍
+
+### 4. 隊伍進化圖鑑
+
+- 根據目前隊伍，顯示可以進化的寶可夢
+- 顯示進化後名稱及進化條件
+- 支援等級、道具、好感度及通訊進化等條件篩選
+- 完成進化後，可直接更新隊伍中的寶可夢資料
+
+## 技術亮點
+
+### PokeAPI 串接
+
+透過 PokeAPI 取得寶可夢的圖鑑編號、屬性及名稱資料，並使用 PokeAPI Sprites 顯示寶可夢圖片。
+
+### 中英文名稱轉換
+
+由於 PokeAPI 主要使用英文名稱查詢，程式加入繁體中文與英文名稱的對照處理。
+未收錄於本機對照表的名稱，會再透過 Pokémon Species API 查找，並將結果快取至瀏覽器。
+
+### 圖片載入 fallback
+
+圖片會依序嘗試以下來源：
+
+1. 本機三位數圖鑑編號圖片
+2. 本機原始圖鑑編號圖片
+3. PokeAPI Sprites 遠端圖片
+
+即使本機沒有圖片，仍可以自動切換至遠端來源。
+
+### 本機資料保存
+
+使用 localStorage 保存隊伍資料及 API 查詢結果，減少重複請求，也讓使用者重新開啟網頁後可以繼續使用原有隊伍。
+
+### 自動部署
+
+設定 GitHub Actions。當程式碼推送至 `main` 分支時，系統會自動建置兩個前端頁面並部署至 GitHub Pages。
+
+## 使用技術
+
+- React 18
+- TypeScript
+- Vite
+- Tailwind CSS
+- PokeAPI REST API
+- PokeAPI Sprites
+- localStorage
+- GitHub Actions
+- GitHub Pages
+
+## 本機執行
+
 ```bash
-npm i
+npm install
 npm run dev
 ```
-把你的 `App.tsx` 貼上覆蓋 `src/App.tsx`。
 
-## 部署到 GitHub Pages
-- `vite.config.ts` 的 `base` 已設定為 `/pokemon-PK/`
-- push 到 `main` 後會自動觸發 GitHub Actions，部署到 Pages。
+## 聲明
 
-https://daisy116.github.io/pokemon-PK/
+本專案為非官方個人學習作品。
+Pokémon 相關名稱、圖片及商標之權利歸原權利人所有；
+寶可夢資料與圖片來源為 PokeAPI。

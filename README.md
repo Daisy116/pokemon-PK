@@ -8,7 +8,6 @@
 - [線上體驗：屬性相剋與隊伍推薦](https://daisy116.github.io/pokemon-PK/)
 - [野生特區與進化圖鑑](https://daisy116.github.io/pokemon-PK/pokedex/)
 - [GitHub Repository](https://github.com/Daisy116/pokemon-PK)
-- 操作影片：待補
 
 ## 專案緣起
 
